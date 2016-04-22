@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
-
+from django.dispatch import Signal
 from django.db import models
+
+
+block_viz_request_signal = Signal(providing_args=['id'])
 
 class BlockVizRequest(models.Model):
 	# When the query was made
@@ -20,6 +23,10 @@ class BlockVizRequest(models.Model):
     
     class Meta:
         ordering = ('created',)
+
+    def save(self, *args, **kwargs):
+        super(BlockVizRequest, self).save(*args, **kwargs) 
+        block_viz_request_signal.send(sender=self.__class__, id=self.id)
 
 class Subcomponent(models.Model):
  	request = models.ForeignKey(BlockVizRequest, related_name="subcomponents")
