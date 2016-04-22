@@ -27,7 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,6 +39,9 @@ INSTALLED_APPS = [
     'API',
     'rest_framework',
 ]
+
+import django
+django.setup()
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
