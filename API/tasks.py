@@ -8,11 +8,11 @@ from django.conf import settings
 from backend.celery import app
 
 # For API graphing request
-from API.models import BlockVizRequest
+from models import BlockVizRequest
 # For transaction data
-from API.blockchain_utils import BlockchainUtils
+from blockchain_utils import BlockchainUtils
 # For visualtion
-from API.graph import Graph
+from graph import Graph
 
 file_dir = settings.BASE_DIR + "/data/"
 
