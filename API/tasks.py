@@ -10,7 +10,7 @@ from backend.celery import app
 # For API graphing request
 from models import BlockVizRequest
 # For transaction data
-from blockchain_utils import BlockchainUtils
+from blockchain_wrapper import Blockchain
 # For visualtion
 from graph import Graph
 
@@ -26,7 +26,7 @@ def generate_block_viz(self, id):
 	# For subcomponents
 	threshold = query.threshold
 
-	txs = BlockchainUtils.get_transactions_by_block(start, end)
+	txs = Blockchain.get_transactions_by_block(start, end)
 
 	G = Graph.get_transaction_graph(txs)
 	graph_path = file_dir + str(id) + ".graphml"

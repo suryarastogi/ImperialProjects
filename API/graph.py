@@ -1,22 +1,22 @@
+import math
 import networkx as nx
 
 api_key = "87575b65-eb36-4322-a0a1-43c2b705479f"
+edge_scale = 5
+addr_weight = 30
+tx_out_weight = 1*edge_scale #5
+tx_in_weight = 4*edge_scale #20
+
+scaling_constant = 26.00/10.00 # 1.00 #12.5460737323 #Average from test block
 
 class Graph(object):
 
-    edge_scale = 5
-    addr_weight = 30
-    tx_out_weight = 1*edge_scale #5
-    tx_in_weight = 4*edge_scale #20
-
-    scaling_constant = 26.00/10.00 # 1.00 #12.5460737323 #Average from test block
-
     @staticmethod
-    def getEdgeScale():
+    def get_edge_scale():
         return edge_scale
 
     @staticmethod
-    def getPrevious(addr, addrHistory):
+    def get_previous(addr, addrHistory):
         if addr in addrHistory:
             # Last element in history
             return addrHistory[addr][-1]
@@ -24,7 +24,7 @@ class Graph(object):
             return None
 
     @staticmethod
-    def addHistory(addr, node_id, addrHistory):
+    def add_history(addr, node_id, addrHistory):
         if addr not in addrHistory:
             addrHistory[addr] = []
         
@@ -63,29 +63,29 @@ class Graph(object):
                     input_id =  "0" + tx_id
                     addr = "0" + tx_id
                     inp.value = 2500000000 #TODO update to be based on height
-                size = scale_size(inp.value, size_list)
+                size = Graph.scale_size(inp.value, size_list)
                 
-                prev = getPrevious(addr, addrHistory)
+                prev = Graph.get_previous(addr, addrHistory)
                 input_node = G.add_node(input_id, size=size)#, color=color)
                 G.add_edge(input_id, tx_id, color=color, weight=tx_in_weight)
                 if prev is not None:
                     G.add_edge(prev, input_id, weight=addr_weight)#, color='gray')
         
-                addHistory(addr, input_id, addrHistory)
+                Graph.add_history(addr, input_id, addrHistory)
             
             outputs = tx.outputs
             for out in outputs:
                 output_id = "o" + tx_id + ":" + str(out.address) + ":" + str(out.n)
                 addr = out.address
-                size = scale_size(out.value, size_list)
+                size = Graph.scale_size(out.value, size_list)
                 
-                prev = getPrevious(addr, addrHistory)
+                prev = Graph.get_previous(addr, addrHistory)
                 output_node = G.add_node(output_id, size=size)#, color='blue')
                 G.add_edge(tx_id, output_id, weight=tx_out_weight)#, color='blue')
                 if prev is not None:
                     G.add_edge(prev, output_id, weight=addr_weight)#, color='gray')
                 
-                addHistory(out.address, output_id, addrHistory)
+                Graph.add_history(out.address, output_id, addrHistory)
 
         #print("Avg Size: " + str(sum(size_list)/float(len(sizes))))
         #print("Max Size: " + str(max(size_list)))

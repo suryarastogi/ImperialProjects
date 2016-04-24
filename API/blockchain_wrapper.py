@@ -1,12 +1,13 @@
 import urllib2
 import json
+from blockchain import blockexplorer
 # Class to manage blockchain(.info) data
 # API Doc
 # https://github.com/blockchain/api-v1-client-python/blob/master/docs/blockexplorer.md
 
 
 api_key = "87575b65-eb36-4322-a0a1-43c2b705479f"
-class BlockchainUtils(object):
+class Blockchain(object):
     # "?api_code=" + api_key
     @staticmethod
     def get_block_json(block):
@@ -35,7 +36,7 @@ class BlockchainUtils(object):
         for i in range (start, end):
             print(i)
             blocks = blockexplorer.get_block_height(str(i), api_code=api_key)
-            #block = blocks[0]
+            block = blocks[0]
             transactions = block.transactions
 
         return transactions
