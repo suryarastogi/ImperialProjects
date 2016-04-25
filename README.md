@@ -7,10 +7,14 @@ RabbitMQ server
 `rabbitmq-server`
 
 Celery worker(s)
-`celery -A backend worker -l info`
+`
+celery -A backend worker -l info
+`
 
 Web server
-`python manage.py runserver`
+`
+python manage.py runserver
+`
 
 ##To Do:
 
