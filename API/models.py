@@ -18,8 +18,8 @@ class BlockVizRequest(models.Model):
     #transactions = models.TextField()
     # Path where the model is saved
     path = models.TextField(null=True)
-    # Rendered/laid out
-    rendered = models.BooleanField(default=False)
+    # Layout generation completed
+    completed = models.BooleanField(default=False)
     
     class Meta:
         ordering = ('created',)

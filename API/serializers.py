@@ -5,4 +5,4 @@ from models import BlockVizRequest
 class BlockVizRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlockVizRequest
-        fields = ('created', 'start', 'end', 'threshold', 'path', 'rendered')
+        fields = ('created', 'start', 'end', 'threshold', 'path', 'completed')

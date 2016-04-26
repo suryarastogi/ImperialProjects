@@ -12,6 +12,17 @@ scaling_constant = 26.00/10.00 # 1.00 #12.5460737323 #Average from test block
 class Graph(object):
 
     @staticmethod
+    def node_type(node):
+        if node[0] == 'i':
+            return 'input'
+        elif node[0] == 'o':
+            return 'output'
+        elif node[0] == 't':
+            return 'tx'
+        else:
+            return 'coinbase'
+
+    @staticmethod
     def get_edge_scale():
         return edge_scale
 
@@ -35,7 +46,7 @@ class Graph(object):
         if value > 0:
             size = math.log(float(value))/scaling_constant
             list.append(size)
-            print(str(size) + ":" + str(value))
+            #print(str(size) + ":" + str(value))
             return size
             
         return 0
@@ -90,4 +101,64 @@ class Graph(object):
         #print("Avg Size: " + str(sum(size_list)/float(len(sizes))))
         #print("Max Size: " + str(max(size_list)))
         #print("Min Size: " + str(min(size_list)))
+        return G
+
+    @staticmethod
+    def colour_transaction_graph(G):
+        nodes = G.nodes()
+        for node in nodes:
+            colour = None
+            ntype = Graph.node_type(node)
+            if ntype == 'input':
+                # Orange
+                G.node[node]['r'] = 255
+                G.node[node]['g'] = 200
+                G.node[node]['b'] = 0
+            elif ntype == 'output':
+                # Blue
+                G.node[node]['r'] = 0
+                G.node[node]['g'] = 0
+                G.node[node]['b'] = 255
+            elif ntype == 'tx':
+                G.node[node]['r'] = 255
+                G.node[node]['g'] = 255
+                G.node[node]['b'] = 255
+            else:
+                G.node[node]['r'] = 0
+                G.node[node]['g'] = 255
+                G.node[node]['b'] = 0
+
+        edges = G.edges_iter()
+        for u, v in edges:
+            colour = None
+        
+            if Graph.node_type(u) == 'tx':
+                if Graph.node_type(v) == 'input':
+                    colour = 'orange'
+                else:
+                    colour = 'blue'    
+            elif Graph.node_type(v) == 'tx':
+                if Graph.node_type(u) == 'input':
+                    colour = 'orange'
+                else:
+                    colour = 'blue'
+            else:
+                colour = 'grey'
+            
+            if colour == 'grey':
+                #Grey
+                G[u][v]['r'] = 137
+                G[u][v]['g'] = 137
+                G[u][v]['b'] = 137
+            elif colour == 'orange':
+                #Orange
+                G[u][v]['r'] = 255
+                G[u][v]['g'] = 200
+                G[u][v]['b'] = 0
+            else:
+                #Orange
+                G[u][v]['r'] = 0
+                G[u][v]['g'] = 0
+                G[u][v]['b'] = 255
+
         return G
