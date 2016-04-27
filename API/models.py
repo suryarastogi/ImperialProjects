@@ -6,7 +6,7 @@ from django.db import models
 block_viz_request_signal = Signal(providing_args=['id'])
 
 class BlockVizRequest(models.Model):
-	# When the query was made
+    # When the query was made
     created = models.DateTimeField(auto_now_add=True)
     # The start block for the visualisation analysis
     start = models.IntegerField()
@@ -26,8 +26,13 @@ class BlockVizRequest(models.Model):
 
     def save(self, *args, **kwargs):
         super(BlockVizRequest, self).save(*args, **kwargs) 
-        block_viz_request_signal.send(sender=self.__class__, id=self.id)
+        if not self.completed:
+            block_viz_request_signal.send(sender=self.__class__, id=self.id)
 
 class Subcomponent(models.Model):
- 	request = models.ForeignKey(BlockVizRequest, related_name="subcomponents")
- 	transactions = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    request = models.ForeignKey(BlockVizRequest, related_name="subcomponents")
+    txs = models.TextField(null=True)
+    txs_length = models.IntegerField(null=True)
+    path = models.TextField(null=True)
+
