@@ -37,6 +37,6 @@ class Blockchain(object):
             print(i)
             blocks = blockexplorer.get_block_height(str(i), api_code=api_key)
             block = blocks[0]
-            transactions = block.transactions
+            transactions += block.transactions
 
         return transactions
