@@ -11,5 +11,5 @@ djangorestframework==3.3.3
 kombu==3.0.35
 Markdown==2.6.6
 networkx==1.11
+pika==0.10.0
 pytz==2016.4
-wheel==0.24.0
