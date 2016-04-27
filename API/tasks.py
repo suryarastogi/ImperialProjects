@@ -130,6 +130,7 @@ def generate_subcomponent(self, id, path):
     os.remove(path)
 
     G = nx.read_graphml(response)
+    txs, txs_length = Graph.get_tx_indexes(G)
 
     # Remove the temporary layout file
     os.remove(response)
@@ -145,4 +146,6 @@ def generate_subcomponent(self, id, path):
     Utils.fix_graphml(graph_path)
 
     sc.path = graph_path
+    sc.txs = txs
+    sc.get_tx_indexes = get_tx_indexes
     sc.save()

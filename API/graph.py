@@ -162,3 +162,21 @@ class Graph(object):
                 G[u][v]['b'] = 255
 
         return G
+
+    def get_tx_index(node):
+        return node.split('tx')[1]
+
+    @staticmethod
+    def get_tx_indexes(G):
+        i = 0
+        txs = ""
+        nodes = G.nodes()
+        for node in nodes:
+            if Graph.node_type(node) == 'tx':
+                if i > 1:
+                    txs += + ', '
+                txs += get_tx_index(node) 
+                i += 1
+
+        return txs, i
+
