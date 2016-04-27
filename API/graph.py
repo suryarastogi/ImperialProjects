@@ -174,7 +174,7 @@ class Graph(object):
         nodes = G.nodes()
         for node in nodes:
             if Graph.node_type(node) == 'tx':
-                if i > 1:
+                if i > 0:
                     txs += ", "
                 txs += Graph.get_tx_index(node) 
                 i += 1

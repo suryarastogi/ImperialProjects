@@ -3,10 +3,20 @@ from rest_framework import generics
 
 from models import BlockVizRequest
 
-from serializers import BlockVizRequestSerializer, BlockVizSearchSerializer
+from models import Subcomponent
+
+from serializers import BlockVizRequestSerializer, BlockVizSearchSerializer, SubcomponentSerializer
+
+class SubcomponentList(generics.ListCreateAPIView):
+    queryset = Subcomponent.objects.all()
+    serializer_class = SubcomponentSerializer
+
+class SubcomponentDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Subcomponent.objects.all()
+    serializer_class = SubcomponentSerializer
 
 class BlockVizSearch(generics.ListCreateAPIView):
-	queryset = BlockVizRequest.objects.all()
+	queryset = Subcomponent.objects.all()
 	serializer_class = BlockVizSearchSerializer
 
 	def get_queryset(self):

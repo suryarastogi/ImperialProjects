@@ -30,9 +30,13 @@ class BlockVizRequest(models.Model):
             block_viz_request_signal.send(sender=self.__class__, id=self.id)
 
 class Subcomponent(models.Model):
+    # When the subcomponent was created
     created = models.DateTimeField(auto_now_add=True)
+    # The request related to the component
     request = models.ForeignKey(BlockVizRequest, related_name="subcomponents")
+    # String with list of tx indexes
     txs = models.TextField(null=True)
+    
     txs_length = models.IntegerField(null=True)
     path = models.TextField(null=True)
 
