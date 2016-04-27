@@ -163,6 +163,7 @@ class Graph(object):
 
         return G
 
+    @staticmethod
     def get_tx_index(node):
         return node.split('tx')[1]
 
@@ -175,7 +176,7 @@ class Graph(object):
             if Graph.node_type(node) == 'tx':
                 if i > 1:
                     txs += + ', '
-                txs += get_tx_index(node) 
+                txs += Graph.get_tx_index(node) 
                 i += 1
 
         return txs, i

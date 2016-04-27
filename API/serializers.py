@@ -18,7 +18,7 @@ class BlockVizRequestSerializer(serializers.ModelSerializer):
     subcomponents = SubcomponentSerializer(many=True, read_only=True)
     class Meta:
         model = BlockVizRequest
-        fields = ('created', 'start', 'end', 'threshold', 'path', 'completed', 'subcomponents')
+        fields = ('id', 'created', 'start', 'end', 'threshold', 'path', 'completed', 'subcomponents')
 
 class BlockVizSearchSerializer(serializers.ModelSerializer):
     class Meta:

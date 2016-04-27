@@ -108,7 +108,7 @@ def generate_subcomponents(self, id):
     num_subcomps = nx.number_connected_components(G)
     i = 0
     for g in nx.connected_component_subgraphs(G):
-        if len(g.nodes()) > query.threshold:
+        if len(g.nodes()) > query.threshold and query.threshold > 0:
             graph_name = str(id) + "C" + str(i) + ".graphml"
             graph_path = connected_dir + graph_name
             nx.write_graphml(g, graph_path)
@@ -147,5 +147,5 @@ def generate_subcomponent(self, id, path):
 
     sc.path = graph_path
     sc.txs = txs
-    sc.get_tx_indexes = get_tx_indexes
+    sc.txs_length = txs_length
     sc.save()
