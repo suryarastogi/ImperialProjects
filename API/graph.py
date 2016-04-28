@@ -112,21 +112,21 @@ class Graph(object):
             if ntype == 'input':
                 # Orange
                 G.node[node]['r'] = 255
-                G.node[node]['g'] = 200
-                G.node[node]['b'] = 0
+                G.node[node]['g'] = 153
+                G.node[node]['b'] = 51
             elif ntype == 'output':
                 # Blue
                 G.node[node]['r'] = 0
-                G.node[node]['g'] = 0
-                G.node[node]['b'] = 255
+                G.node[node]['g'] = 51
+                G.node[node]['b'] = 153
             elif ntype == 'tx':
                 G.node[node]['r'] = 255
                 G.node[node]['g'] = 255
                 G.node[node]['b'] = 255
             else:
-                G.node[node]['r'] = 0
-                G.node[node]['g'] = 255
-                G.node[node]['b'] = 0
+                G.node[node]['r'] = 153
+                G.node[node]['g'] = 204
+                G.node[node]['b'] = 204
 
         edges = G.edges_iter()
         for u, v in edges:
@@ -146,20 +146,20 @@ class Graph(object):
                 colour = 'grey'
             
             if colour == 'grey':
-                #Grey
-                G[u][v]['r'] = 137
-                G[u][v]['g'] = 137
-                G[u][v]['b'] = 137
+                # Grey
+                G[u][v]['r'] = 204
+                G[u][v]['g'] = 204
+                G[u][v]['b'] = 204
             elif colour == 'orange':
                 #Orange
                 G[u][v]['r'] = 255
-                G[u][v]['g'] = 200
-                G[u][v]['b'] = 0
+                G[u][v]['g'] = 153
+                G[u][v]['b'] = 51
             else:
-                #Orange
+                # Blue
                 G[u][v]['r'] = 0
-                G[u][v]['g'] = 0
-                G[u][v]['b'] = 255
+                G[u][v]['g'] = 51
+                G[u][v]['b'] = 153
 
         return G
 
