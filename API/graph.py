@@ -59,7 +59,7 @@ class Graph(object):
         size_list = []
         for tx in transactions:
             
-            tx_id = "tx" + str(tx.tx_index)
+            tx_id = "tx" + str(tx.hash)
             
             tx_node = G.add_node(tx_id)
             
