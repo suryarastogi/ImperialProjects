@@ -19,7 +19,7 @@ class SubcomponentEmbedSerializer(serializers.ModelSerializer):
 
 class BlockVizRequestSerializer(serializers.ModelSerializer):
     path = serializers.CharField(read_only=True)
-    completed = serializers.BooleanField(read_only=True)
+    #completed = serializers.BooleanField(read_only=True)
 
     subcomponents = SubcomponentEmbedSerializer(many=True, read_only=True)
     class Meta:
