@@ -56,7 +56,8 @@ MIDDLEWARE_CLASSES = [
 ]
 
 # RabbitMQ Server
-BROKER_URL = "amqp://guest:guest@146.169.46.187:5672"
+if not DEV_LOCAL:
+    BROKER_URL = "amqp://guest:guest@146.169.46.187:5672"
 
 # TODO: Restrict
 CORS_ORIGIN_ALLOW_ALL = True   
