@@ -24,6 +24,7 @@ SECRET_KEY = 'iaircg--+g$fu3rdk%4z=qbd!bn)88s)$i!-tnzfp_p(0zp&ug'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+DEV_LOCAL = True
 
 ALLOWED_HOSTS = []
 
@@ -53,6 +54,9 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# RabbitMQ Server
+BROKER_URL = "amqp://guest:guest@146.169.46.187:5672"
 
 # TODO: Restrict
 CORS_ORIGIN_ALLOW_ALL = True   
