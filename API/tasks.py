@@ -68,6 +68,7 @@ def generate_block_viz(self, id):
         G = Graph.get_transaction_graph(txs)
         cgraph_path = connected_dir + str(id) + ".graphml"
         nx.write_graphml(G, cgraph_path)
+        Utils.fix_xml(cgraph_path)
 
         print("Queing subcomponents")
         generate_subcomponents.delay(id)
@@ -84,7 +85,7 @@ def generate_block_viz(self, id):
         nx.write_graphml(G, graph_path)
 
         print("Renaming Attributes")
-        Utils.fix_graphml(graph_path)
+        Utils.fix_xml(graph_path)
 
         query.completed = True
         query.path = graph_path
@@ -112,6 +113,8 @@ def generate_subcomponents(self, id):
             graph_name = str(id) + "C" + str(i) + ".graphml"
             graph_path = connected_dir + graph_name
             nx.write_graphml(g, graph_path)
+            Utils.fix_xml(graph_path)
+
             generate_subcomponent.delay(id=id, path=graph_path)
             
         i += 1
@@ -143,7 +146,7 @@ def generate_subcomponent(self, id, path):
     nx.write_graphml(G, graph_path)
 
     print("Renaming Attributes")
-    Utils.fix_graphml(graph_path)
+    Utils.fix_xml(graph_path)
 
     sc.path = graph_path
     sc.txs = txs

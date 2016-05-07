@@ -101,32 +101,58 @@ class Graph(object):
         #print("Avg Size: " + str(sum(size_list)/float(len(sizes))))
         #print("Max Size: " + str(max(size_list)))
         #print("Min Size: " + str(min(size_list)))
+        G = Graph.colour_transaction_graph(G)
         return G
 
     @staticmethod
-    def colour_transaction_graph(G):
+    def colour_element(e, colour):
+        if colour == 'grey':
+            # Grey
+            e['r'] = 204
+            e['g'] = 204
+            e['b'] = 204
+        elif colour == 'orange':
+            #Orange
+            e['r'] = 255
+            e['g'] = 153
+            e['b'] = 51
+        elif colour == 'white':
+            e['r'] = 255
+            e['g'] = 255
+            e['b'] = 255
+        elif colour == 'green':
+            e['r'] = 153
+            e['g'] = 204
+            e['b'] = 204
+        else:
+            # Blue
+            e['r'] = 0
+            e['g'] = 51
+            e['b'] = 153
+
+    @staticmethod
+    def colour_nodes(G):
         nodes = G.nodes()
         for node in nodes:
             colour = None
             ntype = Graph.node_type(node)
             if ntype == 'input':
                 # Orange
-                G.node[node]['r'] = 255
-                G.node[node]['g'] = 153
-                G.node[node]['b'] = 51
+                colour = 'orange'
             elif ntype == 'output':
                 # Blue
-                G.node[node]['r'] = 0
-                G.node[node]['g'] = 51
-                G.node[node]['b'] = 153
+                colour = 'blue'
             elif ntype == 'tx':
-                G.node[node]['r'] = 255
-                G.node[node]['g'] = 255
-                G.node[node]['b'] = 255
+                colour = 'white'
             else:
-                G.node[node]['r'] = 153
-                G.node[node]['g'] = 204
-                G.node[node]['b'] = 204
+                colour = 'green'
+
+            Graph.colour_element(G.node[node], colour)
+        return G
+
+    @staticmethod
+    def colour_transaction_graph(G):
+        G = Graph.colour_nodes(G)
 
         edges = G.edges_iter()
         for u, v in edges:
@@ -145,23 +171,11 @@ class Graph(object):
             else:
                 colour = 'grey'
             
-            if colour == 'grey':
-                # Grey
-                G[u][v]['r'] = 204
-                G[u][v]['g'] = 204
-                G[u][v]['b'] = 204
-            elif colour == 'orange':
-                #Orange
-                G[u][v]['r'] = 255
-                G[u][v]['g'] = 153
-                G[u][v]['b'] = 51
-            else:
-                # Blue
-                G[u][v]['r'] = 0
-                G[u][v]['g'] = 51
-                G[u][v]['b'] = 153
+            Graph.colour_element(G[u][v], colour)
 
         return G
+
+    
 
     @staticmethod
     def get_tx_index(node):
