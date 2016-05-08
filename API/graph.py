@@ -175,8 +175,6 @@ class Graph(object):
 
         return G
 
-    
-
     @staticmethod
     def get_tx_index(node):
         return node.split('tx')[1]

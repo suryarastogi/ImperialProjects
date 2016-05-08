@@ -15,7 +15,7 @@ class SubcomponentEmbedSerializer(serializers.ModelSerializer):
     path = serializers.CharField(read_only=True)
     class Meta:
         model = Subcomponent
-        fields = ('id','created', 'path')
+        fields = ('id', 'path', 'txs_length')
 
 class BlockVizRequestSerializer(serializers.ModelSerializer):
     path = serializers.CharField(read_only=True)
