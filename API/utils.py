@@ -10,8 +10,8 @@ class Utils(object):
         replacements = {}
 
         for key in obj.graphml.key:
-            name = key['attr.name']
-            key_id = key['id']
+            name = '"' + key['attr.name'] + '"' 
+            key_id = '"' + key['id'] + '"' 
             name.replace(" ", "")
 
             replacements[key_id] = name
