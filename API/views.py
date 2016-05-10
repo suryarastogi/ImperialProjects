@@ -1,11 +1,19 @@
 from django.shortcuts import render
 from rest_framework import generics
 
-from models import BlockVizRequest
-
-from models import Subcomponent
-
+from models import BlockVizRequest, Subcomponent
 from serializers import BlockVizRequestSerializer, BlockVizSearchSerializer, SubcomponentSerializer
+
+from models import AddressVizRequest
+from serializers import AddressVizRequestSerializer
+
+class AddressVizRequestDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = AddressVizRequest.objects.all()
+    serializer_class = AddressVizRequestSerializer
+
+class AddressVizRequestList(generics.ListCreateAPIView):
+    queryset = AddressVizRequest.objects.all()
+    serializer_class = AddressVizRequestSerializer
 
 class SubcomponentList(generics.ListCreateAPIView):
     queryset = Subcomponent.objects.all()

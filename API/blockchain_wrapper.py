@@ -71,6 +71,7 @@ class Blockchain(object):
         txs_length = 0
         txs = []
         while len(txs) < limit:
+            print(str(len(txs)) + ":" + str(limit))
             url = base_url + "&offset=" + str(len(txs))
             jso = urllib2.urlopen(url)
             addr_obj = json.load(jso)

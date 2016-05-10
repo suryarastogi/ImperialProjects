@@ -29,14 +29,16 @@ class Utils(object):
 
     # Graph Naming Functions
     @staticmethod
+    def get_address_viz_file_name(id):
+        return "Address" + str(id) + ".graphml"
+
+    @staticmethod
     def get_block_viz_file_name(id):
         return "BlockViz" + str(id) + ".graphml"
 
     @staticmethod
     def get_block_viz_sub_file_name(id, subid):
         return "BlockViz" + str(id) + "C" + str(subid) + ".graphml"
-
-
 
     @staticmethod
     def fix_graphml(graph_path):

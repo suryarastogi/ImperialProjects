@@ -8,4 +8,7 @@ urlpatterns = [
     url(r'^API/Subcomponent/(?P<pk>[0-9]+)/$', views.SubcomponentDetail.as_view()),
     url(r'^API/SubcomponentList/$', views.SubcomponentList.as_view()),
     url(r'^API/BlockVizSearch/$', views.BlockVizSearch.as_view()),
+
+    url(r'^API/AddressVizRequest/(?P<pk>[0-9]+)/$', views.AddressVizRequestDetail.as_view()),
+    url(r'^API/AddressVizRequestList/$', views.AddressVizRequestList.as_view()),
 ]

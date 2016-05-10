@@ -4,6 +4,28 @@ from django.db import models
 
 
 block_viz_request_signal = Signal(providing_args=['id'])
+address_viz_request_signal = Signal(providing_args=['id'])
+
+class AddressVizRequest(models.Model):
+    # When the query was made
+    created = models.DateTimeField(auto_now_add=True)
+    # Desired address
+    address = models.TextField()
+    # Amount of transactions
+    tx_limit = models.IntegerField(default=50)
+
+    # Path where the model is saved
+    path = models.TextField(null=True)
+    # Layout generation completed
+    completed = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('created',)
+
+    def save(self, *args, **kwargs):
+        super(AddressVizRequest, self).save(*args, **kwargs) 
+        if not self.completed:
+            address_viz_request_signal.send(sender=self.__class__, id=self.id)
 
 class BlockVizRequest(models.Model):
     # When the query was made

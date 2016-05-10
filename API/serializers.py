@@ -1,9 +1,14 @@
 from rest_framework import serializers
 
-from models import BlockVizRequest
-from models import Subcomponent
+from models import BlockVizRequest, Subcomponent
+from models import AddressVizRequest
 
 
+class AddressVizRequestSerializer(serializers.ModelSerializer):
+    path = serializers.CharField(read_only=True)
+    class Meta:
+        model = AddressVizRequest
+        fields = ('id', 'address', 'tx_limit', 'created', 'path')
 
 class SubcomponentSerializer(serializers.ModelSerializer):
     path = serializers.CharField(read_only=True)

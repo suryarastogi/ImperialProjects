@@ -9,10 +9,10 @@ from utils import Utils
 from django.conf import settings
 # For celery task processes
 from backend.celery import app
-# For API graphing request
-from models import BlockVizRequest
-# For graph sub components
-from models import Subcomponent
+# For API graphing request and graph subcomponent
+from models import BlockVizRequest, Subcomponent
+# For Address graph
+from models import AddressVizRequest
 # For transaction data
 from blockchain_wrapper import Blockchain
 # For visualtion
@@ -51,6 +51,44 @@ class GephiRpcClient(object):
         return self.response
 
 @app.task(bind=True)
+def generate_address_viz(self, id):
+    query = AddressVizRequest.objects.get(pk=id)
+    if not query.completed:
+        address = query.address
+        limit = query.tx_limit
+
+        txs = Blockchain.get_transactions_by_addr(address, limit)
+        G = Graph.get_transaction_graph(txs)
+
+        cgraph_path = connected_dir + Utils.get_address_viz_file_name(id)
+        nx.write_graphml(G, cgraph_path)
+        Utils.fix_xml(cgraph_path)
+
+        print("Sending:" + cgraph_path)
+        gephi_rpc = GephiRpcClient()
+        response = gephi_rpc.call(cgraph_path)
+        print("Response: " + response)
+
+        G = nx.read_graphml(response)
+        G = Graph.colour_transaction_graph(G)
+
+        graph_path = coloured_dir + Utils.get_address_viz_file_name(id)
+        nx.write_graphml(G, graph_path)
+
+        print("Renaming Attributes")
+        Utils.fix_xml(graph_path)
+
+        query.completed = True
+        query.path = graph_path
+        query.save()
+        # Remove the temporary layout file
+        os.remove(response)
+        # Remove the temporary connection file
+        os.remove(cgraph_path)
+
+    pass
+
+@app.task(bind=True)
 def generate_block_viz(self, id):
     query = BlockVizRequest.objects.get(pk=id)
 
@@ -61,8 +99,8 @@ def generate_block_viz(self, id):
         # For subcomponents
         threshold = query.threshold
 
+        # Get transactions and create graph
         txs = Blockchain.get_transactions_by_block(start, end)
-
         G = Graph.get_transaction_graph(txs)
 
         cgraph_path = connected_dir + Utils.get_block_viz_file_name(id)
