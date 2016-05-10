@@ -58,10 +58,8 @@ class Graph(object):
         addrHistory = {}
         size_list = []
         for tx in transactions:
-            
             tx_id = "tx" + str(tx.hash)
-            
-            tx_node = G.add_node(tx_id)
+            tx_node = G.add_node(tx_id, block=tx.block_height)
             
             inputs = tx.inputs
             for inp in inputs:
@@ -77,10 +75,10 @@ class Graph(object):
                 size = Graph.scale_size(inp.value, size_list)
                 
                 prev = Graph.get_previous(addr, addrHistory)
-                input_node = G.add_node(input_id, size=size)#, color=color)
+                input_node = G.add_node(input_id, size=size, block=tx.block_height)
                 G.add_edge(input_id, tx_id, color=color, weight=tx_in_weight)
                 if prev is not None:
-                    G.add_edge(prev, input_id, weight=addr_weight)#, color='gray')
+                    G.add_edge(prev, input_id, weight=addr_weight)
         
                 Graph.add_history(addr, input_id, addrHistory)
             
@@ -91,10 +89,10 @@ class Graph(object):
                 size = Graph.scale_size(out.value, size_list)
                 
                 prev = Graph.get_previous(addr, addrHistory)
-                output_node = G.add_node(output_id, size=size)#, color='blue')
-                G.add_edge(tx_id, output_id, weight=tx_out_weight)#, color='blue')
+                output_node = G.add_node(output_id, size=size, block=tx.block_height)
+                G.add_edge(tx_id, output_id, weight=tx_out_weight)
                 if prev is not None:
-                    G.add_edge(prev, output_id, weight=addr_weight)#, color='gray')
+                    G.add_edge(prev, output_id, weight=addr_weight)
                 
                 Graph.add_history(out.address, output_id, addrHistory)
 

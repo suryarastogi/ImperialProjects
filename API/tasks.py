@@ -5,13 +5,10 @@ import networkx as nx
 
 # General Utility functions
 from utils import Utils
-
 # For base dir location to save files
 from django.conf import settings
-
 # For celery task processes
 from backend.celery import app
-
 # For API graphing request
 from models import BlockVizRequest
 # For graph sub components
@@ -21,10 +18,11 @@ from blockchain_wrapper import Blockchain
 # For visualtion
 from graph import Graph
 
-connected_dir = settings.BASE_DIR + "/data/Connected/"
-coloured_dir = settings.BASE_DIR + "/data/Coloured/"
+data_dir = settings.BASE_DIR + "/data"
+connected_dir = data_dir + "/Connected/"
+coloured_dir = data_dir + "/Coloured/"
 
-# Remote procedure call for gephi layout task
+# Remote procedure call for Gephi Layout Task
 class GephiRpcClient(object):
     def __init__(self):
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
@@ -66,7 +64,8 @@ def generate_block_viz(self, id):
         txs = Blockchain.get_transactions_by_block(start, end)
 
         G = Graph.get_transaction_graph(txs)
-        cgraph_path = connected_dir + str(id) + ".graphml"
+
+        cgraph_path = connected_dir + Utils.get_block_viz_file_name(id)
         nx.write_graphml(G, cgraph_path)
         Utils.fix_xml(cgraph_path)
 
@@ -81,7 +80,7 @@ def generate_block_viz(self, id):
         G = nx.read_graphml(response)
         G = Graph.colour_transaction_graph(G)
 
-        graph_path = coloured_dir + str(id) + ".graphml"
+        graph_path = coloured_dir + Utils.get_block_viz_file_name(id)
         nx.write_graphml(G, graph_path)
 
         print("Renaming Attributes")
@@ -100,23 +99,21 @@ def generate_subcomponents(self, id):
     query = BlockVizRequest.objects.get(pk=id)
 
     if query.completed:
-        graph_path = coloured_dir + str(id) + ".graphml"
+        graph_path = coloured_dir + Utils.get_block_viz_file_name(id)
     else:
-        graph_path = connected_dir + str(id) + ".graphml"
+        graph_path = connected_dir + Utils.get_block_viz_file_name(id)
 
     G = nx.read_graphml(graph_path)
-    
     num_subcomps = nx.number_connected_components(G)
     i = 0
     for g in nx.connected_component_subgraphs(G):
         if len(g.nodes()) > query.threshold and query.threshold > 0:
-            graph_name = str(id) + "C" + str(i) + ".graphml"
+            graph_name = Utils.get_block_viz_sub_file_name(id, i)
             graph_path = connected_dir + graph_name
             nx.write_graphml(g, graph_path)
             Utils.fix_xml(graph_path)
 
             generate_subcomponent.delay(id=id, path=graph_path)
-            
         i += 1
 
 @app.task(bind=True)
@@ -140,12 +137,9 @@ def generate_subcomponent(self, id, path):
 
     G = Graph.colour_transaction_graph(G)
 
-    graph_name = str(id) + "C" + str(sc.pk) + ".graphml"
+    graph_name = Utils.get_block_viz_sub_file_name(id, sc.pk)
     graph_path = coloured_dir + graph_name
-    
     nx.write_graphml(G, graph_path)
-
-    print("Renaming Attributes")
     Utils.fix_xml(graph_path)
 
     sc.path = graph_path

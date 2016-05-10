@@ -1,14 +1,13 @@
 import untangle
 
 class Utils(object):
-
     # General fix for graphml errors parsing by Gephi
     @staticmethod
     def fix_xml(graph_path):
         obj = untangle.parse(graph_path)
         replace = []
         replacements = {}
-
+        # Replaces ids such as "d10" to actual attributes, ex "size"
         for key in obj.graphml.key:
             name = '"' + key['attr.name'] + '"' 
             key_id = '"' + key['id'] + '"' 
@@ -16,8 +15,6 @@ class Utils(object):
 
             replacements[key_id] = name
             replace.append(key_id)
-
-        print(replacements)
 
         lines = []
         with open(graph_path) as infile:
@@ -30,6 +27,14 @@ class Utils(object):
             for line in lines:
                 outfile.write(line)
 
+    # Graph Naming Functions
+    @staticmethod
+    def get_block_viz_file_name(id):
+        return "BlockViz" + str(id) + ".graphml"
+
+    @staticmethod
+    def get_block_viz_sub_file_name(id, subid):
+        return "BlockViz" + str(id) + "C" + str(subid) + ".graphml"
 
 
 
