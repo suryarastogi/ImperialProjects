@@ -58,7 +58,7 @@ def generate_address_viz(self, id):
         limit = query.tx_limit
 
         txs = Blockchain.get_transactions_by_addr(address, limit)
-        G = Graph.get_transaction_graph(txs)
+        G = Graph.get_transaction_graph(txs, address)
 
         cgraph_path = connected_dir + Utils.get_address_viz_file_name(id)
         nx.write_graphml(G, cgraph_path)
@@ -70,7 +70,7 @@ def generate_address_viz(self, id):
         print("Response: " + response)
 
         G = nx.read_graphml(response)
-        G = Graph.colour_transaction_graph(G)
+        G = Graph.colour_transaction_graph(G, address)
 
         graph_path = coloured_dir + Utils.get_address_viz_file_name(id)
         nx.write_graphml(G, graph_path)

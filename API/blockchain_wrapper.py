@@ -68,14 +68,18 @@ class Blockchain(object):
         #addr = "1dice8EMZmqKvrGE4Qc9bUFf9PX3xaYDp"
         limit_reached = False
         base_url = "https://blockchain.info/address/" + addr + "?format=json" + "&api_code=" + api_key
-        txs_length = 0
+        stop = False
         txs = []
-        while len(txs) < limit:
+        while len(txs) < limit and not stop:
             print(str(len(txs)) + ":" + str(limit))
             url = base_url + "&offset=" + str(len(txs))
             jso = urllib2.urlopen(url)
             addr_obj = json.load(jso)
-            txs += [Transaction(tx) for tx in addr_obj['txs']]
+            new_txs = [Transaction(tx) for tx in addr_obj['txs']]
+            txs += new_txs
+            if len(new_txs) < 50:
+                stop = True
+
         return txs
 
 

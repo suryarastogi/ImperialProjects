@@ -52,7 +52,7 @@ class Graph(object):
         return 0
 
     @staticmethod
-    def get_transaction_graph(transactions):
+    def get_transaction_graph(transactions, highlight=None):
         G = nx.Graph()
 
         addrHistory = {}
@@ -63,7 +63,6 @@ class Graph(object):
             
             inputs = tx.inputs
             for inp in inputs:
-                color = 'orange'
                 if hasattr(inp, 'address'):
                     input_id = "i" + tx_id + ":" + str(inp.address) + ":" + str(inp.n)
                     addr = inp.address
@@ -76,7 +75,7 @@ class Graph(object):
                 
                 prev = Graph.get_previous(addr, addrHistory)
                 input_node = G.add_node(input_id, size=size, block=tx.block_height)
-                G.add_edge(input_id, tx_id, color=color, weight=tx_in_weight)
+                G.add_edge(input_id, tx_id, weight=tx_in_weight)
                 if prev is not None:
                     G.add_edge(prev, input_id, weight=addr_weight)
         
@@ -99,7 +98,7 @@ class Graph(object):
         #print("Avg Size: " + str(sum(size_list)/float(len(sizes))))
         #print("Max Size: " + str(max(size_list)))
         #print("Min Size: " + str(min(size_list)))
-        G = Graph.colour_transaction_graph(G)
+        G = Graph.colour_transaction_graph(G, highlight)
         return G
 
     @staticmethod
@@ -129,12 +128,14 @@ class Graph(object):
             e['b'] = 153
 
     @staticmethod
-    def colour_nodes(G):
+    def colour_nodes(G, highlight=None):
         nodes = G.nodes()
         for node in nodes:
             colour = None
             ntype = Graph.node_type(node)
-            if ntype == 'input':
+            if highlight and highlight in node:
+                colour = 'green'
+            elif ntype == 'input':
                 # Orange
                 colour = 'orange'
             elif ntype == 'output':
@@ -149,8 +150,8 @@ class Graph(object):
         return G
 
     @staticmethod
-    def colour_transaction_graph(G):
-        G = Graph.colour_nodes(G)
+    def colour_transaction_graph(G, highlight=None):
+        G = Graph.colour_nodes(G, highlight)
 
         edges = G.edges_iter()
         for u, v in edges:
@@ -167,7 +168,10 @@ class Graph(object):
                 else:
                     colour = 'blue'
             else:
-                colour = 'grey'
+                if highlight and highlight in v:
+                    colour = 'green'
+                else:
+                    colour = 'grey'
             
             Graph.colour_element(G[u][v], colour)
 
