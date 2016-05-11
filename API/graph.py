@@ -31,31 +31,43 @@ class Graph(object):
     @staticmethod
     def colour_trace(G):
         edges = G.edges_iter()
+        u_colour = None
+        v_colour = None
+        edge_colour = None
+
         for u, v in edges:
             if u in v:
                 # V is an output of U
-                Graph.colour_element(G[u][v], 'orange')
-                Graph.colour_element(G.node[v], 'orange')
-                Graph.colour_element(G.node[u], 'white')
+                edge_colour = 'orange'
+                v_colour = 'orange'
+                u_colour = 'white'
 
             elif v in u:
                 # U is an output of V
-                Graph.colour_element(G[u][v], 'orange')
-                Graph.colour_element(G.node[u], 'orange')
-                Graph.colour_element(G.node[v], 'white')
+                edge_colour = 'orange'
+                u_colour = 'orange'
+                v_colour = 'white'
 
             elif ':' in v:
                 # V input of U
-                Graph.colour_element(G[u][v], 'blue')
-                Graph.colour_element(G.node[v], 'blue')
-                Graph.colour_element(G.node[u], 'white')
+                edge_colour = 'blue'
+                v_colour = 'blue'
+                u_colour = 'white'
 
             else:
                 # U input of V
-                Graph.colour_element(G[u][v], 'blue')
-                Graph.colour_element(G.node[u], 'blue')
-                Graph.colour_element(G.node[v], 'white')
+                edge_colour = 'blue'
+                u_colour = 'blue'
+                v_colour = 'white'
+
+            if u[0] == 'c':
+                u_colour = 'green'
+            elif v[0] == 'c':
+                v_colour = 'green'
                 
+            Graph.colour_element(G[u][v], edge_colour)
+            Graph.colour_element(G.node[v], v_colour)
+            Graph.colour_element(G.node[u], u_colour)
         return G
 
     @staticmethod
