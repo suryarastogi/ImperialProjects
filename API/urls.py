@@ -11,4 +11,7 @@ urlpatterns = [
 
     url(r'^API/AddressVizRequest/(?P<pk>[0-9]+)/$', views.AddressVizRequestDetail.as_view()),
     url(r'^API/AddressVizRequestList/$', views.AddressVizRequestList.as_view()),
+
+    url(r'^API/TraceTxVizRequest/(?P<pk>[0-9]+)/$', views.TraceTxVizRequestDetail.as_view()),
+    url(r'^API/TraceTxVizRequestList/$', views.TraceTxVizRequestList.as_view()),
 ]

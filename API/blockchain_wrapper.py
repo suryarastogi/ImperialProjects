@@ -1,6 +1,8 @@
 import urllib2
 import json
 from blockchain import blockexplorer
+from collections import deque
+
 # Class to manage blockchain(.info) data
 # API Doc
 # https://github.com/blockchain/api-v1-client-python/blob/master/docs/blockexplorer.md
@@ -54,6 +56,50 @@ api_key = "87575b65-eb36-4322-a0a1-43c2b705479f"
 class Blockchain(object):
     # "?api_code=" + api_key
     @staticmethod
+    def get_tx(index):
+        return blockexplorer.get_tx(index, api_code=api_key)
+
+    @staticmethod
+    def trace_transaction_complete(index):
+        txs = []
+
+        q = deque()
+        q.append(index)
+
+        while len(q) > 0:
+            print("Q: " + str(len(q)) + " txs:" + str(len(txs)))
+            tx = Blockchain.get_tx(q.popleft())
+            txs.append(tx)
+
+            inputs = tx.inputs
+            for inp in inputs:
+                # Else coinbase
+                if hasattr(inp, 'address'):
+                    q.append(str(inp.tx_index))
+        return txs
+
+    @staticmethod
+    def trace_transaction(index, limit=50):
+        txs = []
+
+        q = deque()
+        q.append(index)
+
+        i = 0
+        while len(q) > 0 and i < limit:
+            print("Q: " + str(len(q)) + " i:" + str(i) + " txs:" + str(len(txs)))
+            tx = Blockchain.get_tx(q.popleft())
+            txs.append(tx)
+
+            inputs = tx.inputs
+            for inp in inputs:
+                # Else coinbase
+                if hasattr(inp, 'address'):
+                    q.append(str(inp.tx_index))
+            i = i + 1
+        return txs
+
+    @staticmethod
     def get_block_json(block):
         #https://blockchain.info/block-index/$block_index?format=json
         url = "https://blockchain.info/rawblock/" + str(block) + "?format=json" + "&api_code=" + api_key
@@ -81,8 +127,6 @@ class Blockchain(object):
                 stop = True
 
         return txs
-
-
 
     @staticmethod
     def get_transactions_by_block_json(start, end):

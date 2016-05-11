@@ -1,5 +1,7 @@
 import untangle
 
+from celery.task.control import discard_all
+
 class Utils(object):
     # General fix for graphml errors parsing by Gephi
     @staticmethod
@@ -28,6 +30,10 @@ class Utils(object):
                 outfile.write(line)
 
     # Graph Naming Functions
+    @staticmethod
+    def get_trace_tx_viz_file_name(id):
+        return "TraceTx" + str(id) + ".graphml"
+
     @staticmethod
     def get_address_viz_file_name(id):
         return "Address" + str(id) + ".graphml"

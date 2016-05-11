@@ -13,6 +13,8 @@ from backend.celery import app
 from models import BlockVizRequest, Subcomponent
 # For Address graph
 from models import AddressVizRequest
+# For Trace Tx Visualisation
+from models import TraceTxVizRequest
 # For transaction data
 from blockchain_wrapper import Blockchain
 # For visualtion
@@ -51,6 +53,43 @@ class GephiRpcClient(object):
         return self.response
 
 @app.task(bind=True)
+def generate_trace_tx_viz(self,id):
+    query = TraceTxVizRequest.objects.get(pk=id)
+    if not query.completed:
+        tx_index = query.hash_index
+
+        txs = Blockchain.trace_transaction(tx_index, 1000)
+        #G = Graph.get_transaction_graph(txs)
+        G = Graph.get_trace_graph(txs)
+
+        cgraph_path = connected_dir + Utils.get_trace_tx_viz_file_name(id)
+        nx.write_graphml(G, cgraph_path)
+        Utils.fix_xml(cgraph_path)
+
+        print("Sending:" + cgraph_path)
+        gephi_rpc = GephiRpcClient()
+        response = gephi_rpc.call(cgraph_path)
+        print("Response: " + response)
+
+        G = nx.read_graphml(response)
+        G = Graph.colour_trace(G)
+
+        graph_path = coloured_dir + Utils.get_trace_tx_viz_file_name(id)
+        nx.write_graphml(G, graph_path)
+
+        print("Renaming Attributes")
+        Utils.fix_xml(graph_path)
+
+        query.completed = True
+        query.path = graph_path
+        query.save()
+        # Remove the temporary layout file
+        os.remove(response)
+        # Remove the temporary connection file
+        os.remove(cgraph_path)
+    pass
+
+@app.task(bind=True)
 def generate_address_viz(self, id):
     query = AddressVizRequest.objects.get(pk=id)
     if not query.completed:
@@ -85,8 +124,6 @@ def generate_address_viz(self, id):
         os.remove(response)
         # Remove the temporary connection file
         os.remove(cgraph_path)
-
-    pass
 
 @app.task(bind=True)
 def generate_block_viz(self, id):

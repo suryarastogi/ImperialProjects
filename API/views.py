@@ -7,6 +7,17 @@ from serializers import BlockVizRequestSerializer, BlockVizSearchSerializer, Sub
 from models import AddressVizRequest
 from serializers import AddressVizRequestSerializer
 
+from models import TraceTxVizRequest
+from serializers import TraceTxVizRequestSerializer
+
+class TraceTxVizRequestDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = TraceTxVizRequest.objects.all()
+    serializer_class = TraceTxVizRequestSerializer
+
+class TraceTxVizRequestList(generics.ListCreateAPIView):
+    queryset = TraceTxVizRequest.objects.all()
+    serializer_class = TraceTxVizRequestSerializer
+
 class AddressVizRequestDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = AddressVizRequest.objects.all()
     serializer_class = AddressVizRequestSerializer

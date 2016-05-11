@@ -23,6 +23,69 @@ class Graph(object):
             return 'coinbase'
 
     @staticmethod
+    def get_node(G, nodes, node):
+        if node not in nodes:
+            nodes[node] = G.add_node(node)
+        return nodes[node]
+
+    @staticmethod
+    def colour_trace(G):
+        edges = G.edges_iter()
+        for u, v in edges:
+            if u in v:
+                # V is an output of U
+                Graph.colour_element(G[u][v], 'orange')
+                Graph.colour_element(G.node[v], 'orange')
+                Graph.colour_element(G.node[u], 'white')
+
+            elif v in u:
+                # U is an output of V
+                Graph.colour_element(G[u][v], 'orange')
+                Graph.colour_element(G.node[u], 'orange')
+                Graph.colour_element(G.node[v], 'white')
+
+            elif ':' in v:
+                # V input of U
+                Graph.colour_element(G[u][v], 'blue')
+                Graph.colour_element(G.node[v], 'blue')
+                Graph.colour_element(G.node[u], 'white')
+
+            else:
+                # U input of V
+                Graph.colour_element(G[u][v], 'blue')
+                Graph.colour_element(G.node[u], 'blue')
+                Graph.colour_element(G.node[v], 'white')
+                
+        return G
+
+    @staticmethod
+    def get_trace_graph(transactions):
+        G = nx.Graph()
+        nodes = {}
+        for tx in transactions:
+            tx_id = str(tx.tx_index)
+            tx_node = G.add_node(tx_id)
+
+            inputs = tx.inputs
+            for inp in inputs:
+                if hasattr(inp, 'address'):
+                    node = str(inp.tx_index) + ":" + str(inp.n)
+                else:
+                    node = "c" + tx_id
+
+                inp_node = Graph.get_node(G, nodes, node)
+                G.add_edge(tx_id, node, weight=tx_in_weight)
+
+            outputs = tx.outputs
+            for out in outputs:
+                node = str(out.tx_index) + ":" + str(out.n)
+                out_node = Graph.get_node(G, nodes, node)
+                G.add_edge(tx_id, node, weight=tx_out_weight)
+
+        G = Graph.colour_trace(G)
+        return G
+
+    @staticmethod
     def get_edge_scale():
         return edge_scale
 
