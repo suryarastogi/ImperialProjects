@@ -1,5 +1,6 @@
 import urllib2
 import json
+from utils import Utils
 from blockchain import blockexplorer
 from collections import deque
 
@@ -140,6 +141,14 @@ class Blockchain(object):
         return transactions #transactions[0]["out"] or transactions[0]["inputs"]
 
     # Returns all transactions from the start block to end block
+
+    @staticmethod
+    def process_transactions(txs, block_time):
+        for tx in txs:
+            tx.confirmation_mins = Utils.get_mins_between(tx.time, block_time)
+        return txs
+
+
     @staticmethod
     def get_transactions_by_block(start, end):
         transactions = []
@@ -147,6 +156,7 @@ class Blockchain(object):
             print(i)
             blocks = blockexplorer.get_block_height(str(i), api_code=api_key)
             block = blocks[0]
-            transactions += block.transactions
+            transactions += Blockchain.process_transactions(block.transactions, block.received_time)
+
 
         return transactions

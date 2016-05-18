@@ -134,7 +134,10 @@ class Graph(object):
         size_list = []
         for tx in transactions:
             tx_id = "tx" + str(tx.hash)
-            tx_node = G.add_node(tx_id, block=tx.block_height)
+            if hasattr(tx, 'confirmation_mins'):
+                tx_node = G.add_node(tx_id, block=tx.block_height, mins=tx.confirmation_mins)
+            else:
+                tx_node = G.add_node(tx_id, block=tx.block_height)
             
             inputs = tx.inputs
             for inp in inputs:
@@ -178,12 +181,14 @@ class Graph(object):
 
     @staticmethod
     def colour_element(e, colour):
+
         if colour == 'grey':
             # Grey
             e['r'] = 204
             e['g'] = 204
             e['b'] = 204
         elif colour == 'orange':
+            #rgb = (255, 153, 51)
             #Orange
             e['r'] = 255
             e['g'] = 153
@@ -196,12 +201,25 @@ class Graph(object):
             e['r'] = 153
             e['g'] = 204
             e['b'] = 204
+        elif colour == 'light_green':
+            e['r'] = 190
+            e['g'] = 253
+            e['b'] = 0
+        elif colour == 'red':
+            e['r'] = 248
+            e['g'] = 0
+            e['b'] = 0
         else:
             # Blue
             e['r'] = 0
             e['g'] = 51
             e['b'] = 153
 
+        #red, green, blue = rgb
+        
+        #e['r'] = red
+        #e['g'] = green
+        #e['b'] = blue
     @staticmethod
     def colour_nodes(G, highlight=None):
         nodes = G.nodes()
@@ -209,7 +227,7 @@ class Graph(object):
             colour = None
             ntype = Graph.node_type(node)
             if highlight and highlight in node:
-                colour = 'green'
+                colour = 'red'
             elif ntype == 'input':
                 # Orange
                 colour = 'orange'
@@ -217,7 +235,13 @@ class Graph(object):
                 # Blue
                 colour = 'blue'
             elif ntype == 'tx':
-                colour = 'white'
+                if 'mins' in G.node[node]:
+                    if G.node[node]['mins'] < 20:
+                        colour = 'light_green'
+                    else:
+                     colour = 'red'
+                else:
+                    colour = 'white'
             else:
                 colour = 'green'
 

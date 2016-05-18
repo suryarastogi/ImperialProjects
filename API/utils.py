@@ -1,4 +1,5 @@
 import untangle
+import math
 
 from celery.task.control import discard_all
 
@@ -28,6 +29,14 @@ class Utils(object):
         with open(graph_path, 'w') as outfile:
             for line in lines:
                 outfile.write(line)
+
+    @staticmethod
+    def get_mins_between(start, end):
+        return float(math.fabs(start-end))/float(60)
+
+    @staticmethod
+    def is_mins_after(start, end, mins=30):
+        return math.fabs(start-end) > (mins*60)
 
     # Graph Naming Functions
     @staticmethod
