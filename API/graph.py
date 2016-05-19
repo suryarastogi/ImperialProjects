@@ -185,7 +185,6 @@ class Graph(object):
         if colour == 'grey':
             rgb = 204, 204, 204
         elif colour == 'orange':
-            #rgb = (255, 153, 51)
             rgb = 255, 153, 51
         elif colour == 'white':
             rgb = 255, 255, 255

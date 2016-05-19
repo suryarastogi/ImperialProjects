@@ -20,7 +20,7 @@ from blockchain_wrapper import Blockchain
 # For visualtion
 from graph import Graph
 
-data_dir = settings.BASE_DIR + "/data"
+data_dir = settings.DATA_DIR
 connected_dir = data_dir + "/Connected/"
 coloured_dir = data_dir + "/Coloured/"
 

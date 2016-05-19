@@ -55,9 +55,13 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# RabbitMQ Server
+# RabbitMQ Server and FileSystem
 if not DEV_LOCAL:
     BROKER_URL = "amqp://guest:guest@146.169.46.187:5672"
+    DATA_DIR = "/vol/bitbucket/sr3213/data"
+else:
+    DATA_DIR = BASE_DIR + "/data"
+
 
 # TODO: Restrict
 CORS_ORIGIN_ALLOW_ALL = True   
