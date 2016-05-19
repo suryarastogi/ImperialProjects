@@ -181,45 +181,29 @@ class Graph(object):
 
     @staticmethod
     def colour_element(e, colour):
-
+        rgb = None
         if colour == 'grey':
-            # Grey
-            e['r'] = 204
-            e['g'] = 204
-            e['b'] = 204
+            rgb = 204, 204, 204
         elif colour == 'orange':
             #rgb = (255, 153, 51)
-            #Orange
-            e['r'] = 255
-            e['g'] = 153
-            e['b'] = 51
+            rgb = 255, 153, 51
         elif colour == 'white':
-            e['r'] = 255
-            e['g'] = 255
-            e['b'] = 255
+            rgb = 255, 255, 255
         elif colour == 'green':
-            e['r'] = 153
-            e['g'] = 204
-            e['b'] = 204
+            rgb = 153, 204, 204
         elif colour == 'light_green':
-            e['r'] = 190
-            e['g'] = 253
-            e['b'] = 0
+            rgb = 190, 253, 0
         elif colour == 'red':
-            e['r'] = 248
-            e['g'] = 0
-            e['b'] = 0
+            rgb = 248, 0, 0
         else:
             # Blue
-            e['r'] = 0
-            e['g'] = 51
-            e['b'] = 153
+            rgb = 0, 51, 153
 
-        #red, green, blue = rgb
+        red, green, blue = rgb
         
-        #e['r'] = red
-        #e['g'] = green
-        #e['b'] = blue
+        e['r'] = red
+        e['g'] = green
+        e['b'] = blue
     @staticmethod
     def colour_nodes(G, highlight=None):
         nodes = G.nodes()
