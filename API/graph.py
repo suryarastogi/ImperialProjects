@@ -186,6 +186,10 @@ class Graph(object):
             rgb = 204, 204, 204
         elif colour == 'orange':
             rgb = 255, 153, 51
+        elif colour == 'light_orange':
+            rgb = 255, 204, 153
+        elif colour == 'lighter_orange':
+            rgb = 255, 229, 204
         elif colour == 'white':
             rgb = 255, 255, 255
         elif colour == 'green':
@@ -194,6 +198,12 @@ class Graph(object):
             rgb = 190, 253, 0
         elif colour == 'red':
             rgb = 248, 0, 0
+        elif colour == 'light_red':
+            rgb = 251, 127, 127
+        elif colour == 'light_blue':
+            rgb = 127, 153, 204
+        elif colour == 'lighter_blue':
+            rgb = 191, 205, 229
         else:
             # Blue
             rgb = 0, 51, 153
@@ -203,12 +213,14 @@ class Graph(object):
         e['r'] = red
         e['g'] = green
         e['b'] = blue
+
     @staticmethod
     def colour_nodes(G, highlight=None):
         nodes = G.nodes()
         for node in nodes:
             colour = None
             ntype = Graph.node_type(node)
+
             if highlight and highlight in node:
                 colour = 'red'
             elif ntype == 'input':
@@ -229,6 +241,7 @@ class Graph(object):
                 colour = 'green'
 
             Graph.colour_element(G.node[node], colour)
+
         return G
 
     @staticmethod
@@ -238,20 +251,21 @@ class Graph(object):
         edges = G.edges_iter()
         for u, v in edges:
             colour = None
-        
-            if Graph.node_type(u) == 'tx':
-                if Graph.node_type(v) == 'input':
-                    colour = 'orange'
-                else:
-                    colour = 'blue'    
-            elif Graph.node_type(v) == 'tx':
-                if Graph.node_type(u) == 'input':
-                    colour = 'orange'
-                else:
-                    colour = 'blue'
+            
+            # Same address link
+            if highlight and (highlight in v and highlight in u):
+                colour = 'light_red'
+            elif ((Graph.node_type(u) == 'tx' and Graph.node_type(v) == 'input') 
+                or (Graph.node_type(v) == 'tx' and Graph.node_type(u) == 'input')):
+                colour = 'orange'
+            elif ((Graph.node_type(u) == 'tx' and Graph.node_type(v) == 'output')
+                or (Graph.node_type(v) == 'tx' and Graph.node_type(u) == 'output')):
+                colour = 'blue'    
             else:
-                if highlight and highlight in v:
-                    colour = 'green'
+                if Graph.node_type(v) == 'input' and Graph.node_type(u) =='input':
+                    colour = 'lighter_orange'
+                elif Graph.node_type(v) == 'output' and Graph.node_type(u) =='output':
+                    colour = 'lighter_blue'
                 else:
                     colour = 'grey'
             

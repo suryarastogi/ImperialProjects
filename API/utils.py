@@ -8,9 +8,13 @@ class Utils(object):
 
     @staticmethod
     def fix_gephi_graphml(graph_path):
+        print("Reading: " + graph_path)
         G = nx.read_graphml(graph_path)
+        print("Colouring Graph")
         G = Graph.colour_transaction_graph(G)
+        print("Writing Out")
         nx.write_graphml(G, graph_path)
+        print("Fixint Attributes")
         Utils.fix_xml(graph_path)
 
     # General fix for graphml inconsistencies between
