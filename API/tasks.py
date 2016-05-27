@@ -1,8 +1,10 @@
+# Graphing Tasks
+
 import os
 import pika
 import uuid
+# Network library for graph manipulation
 import networkx as nx
-
 # General Utility functions
 from utils import Utils
 # For base dir location to save files
@@ -137,7 +139,7 @@ def generate_block_viz(self, id):
         threshold = query.threshold
 
         # Get transactions and create graph
-        txs = Blockchain.get_transactions_by_block(start, end)
+        txs = Blockchain.get_transactions_by_blocks(start, end)
         G = Graph.get_transaction_graph(txs)
 
         cgraph_path = connected_dir + Utils.get_block_viz_file_name(id)

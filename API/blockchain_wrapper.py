@@ -150,13 +150,15 @@ class Blockchain(object):
 
 
     @staticmethod
-    def get_transactions_by_block(start, end):
+    def get_transactions_by_blocks(start, end):
         transactions = []
         for i in range (start, end):
             print(i)
-            blocks = blockexplorer.get_block_height(str(i), api_code=api_key)
-            block = blocks[0]
-            transactions += Blockchain.process_transactions(block.transactions, block.received_time)
-
-
+            transactions += Blockchain.get_transactions_by_block(i)
         return transactions
+
+    @staticmethod
+    def get_transactions_by_block(block_height):
+        blocks = blockexplorer.get_block_height(str(block_height), api_code=api_key)
+        block = blocks[0]
+        return Blockchain.process_transactions(block.transactions, block.received_time)
