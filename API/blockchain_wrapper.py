@@ -3,6 +3,7 @@ import json
 from utils import Utils
 from blockchain import blockexplorer
 from collections import deque
+from kaiko_wrapper import Kaiko
 
 # Class to manage blockchain(.info) data
 # API Doc
@@ -144,8 +145,37 @@ class Blockchain(object):
 
     @staticmethod
     def process_transactions(txs, block_time):
+        earliest_time = float("inf")
+        latest_time = 0
+
         for tx in txs:
+            time = tx.time
+            if time < earliest_time:
+                earliest_time = time
+            if time > latest_time:
+                latest_time = time
+
             tx.confirmation_mins = Utils.get_mins_between(tx.time, block_time)
+
+        mempool_data = Kaiko.get_mempool_sizes(earliest_time, latest_time)
+
+        for tx in txs:
+            time = tx.time
+            dist = 0
+            mempool_size = None
+            while mempool_size is None:
+                if str(tx.time-dist) in mempool_data:
+                    mempool_size = mempool_data[str(tx.time-dist)]
+                    print("i:" + str(tx.tx_index) + ":" + str(tx.time-dist) + ":" + mempool_size)
+
+                elif str(tx.time+dist) in mempool_data:
+                    mempool_size = mempool_data[str(tx.time+dist)]
+                    print("i:" + str(tx.tx_index) + ":" + str(tx.time+dist) + ":" + mempool_size)
+
+                dist +=1
+
+            tx.mempool_size = mempool_size
+
         return txs
 
 

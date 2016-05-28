@@ -6,8 +6,8 @@ COINBASE_ERA_LENGTH = 210000
 
 graph = Graph("http://neo4j:admin@localhost:7474/db/data/")
 addr_type = "Address" # address
-tx_type = "Transaction" # hash, tx_index, size, n_inputs, n_outputs, received_time, confirmation_mins
-block_type = "Block" # height, time, received_time, n_tx, size
+tx_type = "Transaction" # (hash, tx_index, size, n_inputs, n_outputs, received_time, confirmation_mins)
+block_type = "Block" # (height, time, received_time, n_tx, size)
 input_in = "INPUT_IN"
 output_in = "OUTPUT_IN"
 stored_in = "STORED_IN"
@@ -43,6 +43,7 @@ class Neo4j(object):
             tx_node['n_outputs'] = len(tx.outputs)
             tx_node['received_time'] = tx.time
             tx_node['confirmation_mins'] = tx.confirmation_mins
+            tx_node['mempool_size'] = tx.mempool_size
             tx_node.push()
         
             tx_stored_in_block = Relationship(tx_node, stored_in, block_node)
@@ -77,6 +78,6 @@ class Neo4j(object):
                 node_output_in_tx = Relationship(out_node, output_in, tx_node, value=value)
                 graph.create(node_output_in_tx)
 
-            print(str(txi) + ":" + str(len(transactions)))
+            #print(str(txi) + ":" + str(len(transactions)))
         print("Block " + str(block_height) + " done with " + str(len(transactions)) + " transactions.")
 
