@@ -3,13 +3,13 @@ import dateutil.parser
 import datetime, time
 
 api_key = "l47TFgwXpnmshAiGPqIzxOlhAVd9p116jKbjsn789BfxQhJJy9"
-request_buckets = 20000
+request_buckets = 10000
 
 class Kaiko(object):
 
 	@staticmethod
 	def get_mempool_sizes(start, end):
-		print("Mempool range (" + str(start) + "," + str(end) + ")")
+		#print("Mempool range (" + str(start) + "," + str(end) + ")")
 
 		if (int(end) - int(start)) > request_buckets:
 			time_dict = {}
@@ -28,7 +28,7 @@ class Kaiko(object):
 		
 	@staticmethod
 	def get_mempool_data(start, end, time_dict=None):
-		print("Getting Mempool from Kaiko for (" + str(start) + "," + str(end) + ")")
+		print("-- Kaiko: Getting Mempool from Kaiko for (" + str(start) + "," + str(end) + ")")
 		url = "https://kaiko-kaiko-private-v1.p.mashape.com/mempool?from=%s&to=%s" % (str(start), str(end))
 		response = unirest.get(url,
 		  headers={

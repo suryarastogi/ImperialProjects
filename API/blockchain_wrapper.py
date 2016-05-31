@@ -156,9 +156,9 @@ class Blockchain(object):
                 latest_time = time
 
             tx.confirmation_mins = Utils.get_mins_between(tx.time, block_time)
-
+        print("-- Process: Confirmation Appended")
         mempool_data = Kaiko.get_mempool_sizes(earliest_time, latest_time)
-
+        print("-- Process: Kaiko Data Received")
         for tx in txs:
             time = tx.time
             dist = 0
@@ -166,16 +166,16 @@ class Blockchain(object):
             while mempool_size is None:
                 if str(tx.time-dist) in mempool_data:
                     mempool_size = mempool_data[str(tx.time-dist)]
-                    print("i:" + str(tx.tx_index) + ":" + str(tx.time-dist) + ":" + mempool_size)
+                    #print("i:" + str(tx.tx_index) + ":" + str(tx.time-dist) + ":" + mempool_size)
 
                 elif str(tx.time+dist) in mempool_data:
                     mempool_size = mempool_data[str(tx.time+dist)]
-                    print("i:" + str(tx.tx_index) + ":" + str(tx.time+dist) + ":" + mempool_size)
+                    #print("i:" + str(tx.tx_index) + ":" + str(tx.time+dist) + ":" + mempool_size)
 
                 dist +=1
 
             tx.mempool_size = mempool_size
-
+        print("-- Process: Mempool Appended")
         return txs
 
 

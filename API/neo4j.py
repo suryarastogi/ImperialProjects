@@ -12,7 +12,59 @@ input_in = "INPUT_IN"
 output_in = "OUTPUT_IN"
 stored_in = "STORED_IN"
 
+class Transaction:
+    def __init__(self, t, block_height=None):
+        self.block_height = block_height
+        self.time = t['received_time']
+        self.hash = t['hash']
+        self.tx_index = t['tx_index']
+        self.size = t['size']
+        self.inputs = []
+        self.outputs = []
+        
+        if self.block_height is None:
+            self.block_height = -1
+
 class Neo4j(object):
+
+    @staticmethod
+    def get_block_data(block=411293):
+        query = "MATCH (n:Block)-[:STORED_IN]-(transaction) WHERE n.height = " + str(block) + " RETURN transaction"
+        result = graph.cypher.execute(query)
+        txs = []
+        for record in result.records:
+            transaction = record.transaction
+            tx = Transaction(transaction, block)
+            # Inputs
+            for rel in graph.match(end_node=transaction, rel_type=input_in):
+                print("AddrI: " + rel.start_node["address"])
+
+            for rel in graph.match(end_node=transaction, rel_type=output_in):
+                print("AddrO: " + rel.start_node["address"])
+                
+            txs.append(tx)
+        
+        return result, txs
+
+    @staticmethod
+    def get_tx_input_data(hash='9624905d95b0820c4a410f6265ea7bcb1cc8fa575c65210641f474e0a439243b'):
+        query = "MATCH (tx:Transaction)-[:INPUT_IN]-(input) WHERE tx.hash = '" + str(hash) + "' RETURN input"
+        result = graph.cypher.execute(query)
+        return result
+
+        # for record in result.records:
+        #     input = record.input
+        #      input = Input()
+
+
+
+    @staticmethod
+    def import_difficulty(start_block):
+        end_block = start_block + 2016 + 1
+
+        for i in range(start_block, end_block):
+            print("Importing block: " + str(i) + " of " + str(end_block))
+            Neo4j.import_block(i)
 
     @staticmethod
     def setup_db():
@@ -22,9 +74,11 @@ class Neo4j(object):
 
     @staticmethod
     def import_block(block_height):
+        print("Neo4j: Getting Block " + str(block_height))
         blocks = blockexplorer.get_block_height(str(block_height), api_code="87575b65-eb36-4322-a0a1-43c2b705479f")
         block = blocks[0]
 
+        print("Neo4j: Adding Block to DB")
         block_node = graph.merge_one(block_type, "height", block.height)
         block_node['time'] = block.time
         block_node['received_time'] = block.received_time
@@ -33,7 +87,7 @@ class Neo4j(object):
         block_node.push()
 
         transactions = Blockchain.process_transactions(block.transactions, block.received_time)
-
+        print("Neo4j: Adding Txs to DB")
         for txi, tx in enumerate(transactions):
         
             tx_node = graph.merge_one(tx_type, "hash", tx.hash)
@@ -69,8 +123,8 @@ class Neo4j(object):
                 address = out.address
                 if not address:
                     address = "a" + str(tx.tx_index) + ":" + str(out.n)
-                    print("Tx hash: " + tx.hash)
-                    print("Addr: " + address)
+                    #print("Tx hash: " + tx.hash)
+                    #print("Addr: " + address)
                 value = out.value
         
                 out_node = graph.merge_one("Address",'address', address)
@@ -78,6 +132,8 @@ class Neo4j(object):
                 node_output_in_tx = Relationship(out_node, output_in, tx_node, value=value)
                 graph.create(node_output_in_tx)
 
-            #print(str(txi) + ":" + str(len(transactions)))
+            if txi % 500 == 0:
+                print("---- Status: " + str(txi) + ":" + str(len(transactions)))
+
         print("Block " + str(block_height) + " done with " + str(len(transactions)) + " transactions.")
 
