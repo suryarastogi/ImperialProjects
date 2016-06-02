@@ -135,24 +135,26 @@ class Graph(object):
         for tx in transactions:
             tx_id = "tx" + str(tx.hash)
             if hasattr(tx, 'confirmation_mins'):
-                tx_node = G.add_node(tx_id, block=tx.block_height, mins=tx.confirmation_mins)
+                tx_node = G.add_node(tx_id, block=tx.block_height, mins=tx.confirmation_mins, type='tx')
             else:
-                tx_node = G.add_node(tx_id, block=tx.block_height)
+                tx_node = G.add_node(tx_id, block=tx.block_height, type='tx')
             
             inputs = tx.inputs
             for inp in inputs:
+                node_type = 'input'
                 if hasattr(inp, 'address'):
                     input_id = "i" + tx_id + ":" + str(inp.address) + ":" + str(inp.n)
                     addr = inp.address
                 else:
                     # Coinbase
+                    node_type = 'coinbase'
                     input_id =  "0" + tx_id
                     addr = "0" + tx_id
                     inp.value = 2500000000 #TODO update to be based on height
                 size = Graph.scale_size(inp.value, size_list)
                 
                 prev = Graph.get_previous(addr, addrHistory)
-                input_node = G.add_node(input_id, size=size, block=tx.block_height)
+                input_node = G.add_node(input_id, size=size, block=tx.block_height, type=node_type)
                 G.add_edge(input_id, tx_id, weight=tx_in_weight)
                 if prev is not None:
                     G.add_edge(prev, input_id, weight=addr_weight)
@@ -166,7 +168,7 @@ class Graph(object):
                 size = Graph.scale_size(out.value, size_list)
                 
                 prev = Graph.get_previous(addr, addrHistory)
-                output_node = G.add_node(output_id, size=size, block=tx.block_height)
+                output_node = G.add_node(output_id, size=size, block=tx.block_height, type='output')
                 G.add_edge(tx_id, output_id, weight=tx_out_weight)
                 if prev is not None:
                     G.add_edge(prev, output_id, weight=addr_weight)
@@ -219,6 +221,7 @@ class Graph(object):
         nodes = G.nodes()
         for node in nodes:
             colour = None
+            #ntype = G.node[node]['type']
             ntype = Graph.node_type(node)
 
             if highlight and highlight in node:
@@ -252,20 +255,25 @@ class Graph(object):
         for u, v in edges:
             colour = None
             
-            # Same address link
+            #u_type = G.node[u]['type']
+            u_type = Graph.node_type(u)
+            #v_type = G.node[v]['type']
+            v_type = Graph.node_type(v)
+
             if highlight and (highlight in v and highlight in u):
                 colour = 'light_red'
-            elif ((Graph.node_type(u) == 'tx' and Graph.node_type(v) == 'input') 
-                or (Graph.node_type(v) == 'tx' and Graph.node_type(u) == 'input')):
+            elif ((u_type == 'tx' and v_type == 'input') 
+                or (v_type == 'tx' and u_type == 'input')):
                 colour = 'orange'
-            elif ((Graph.node_type(u) == 'tx' and Graph.node_type(v) == 'output')
-                or (Graph.node_type(v) == 'tx' and Graph.node_type(u) == 'output')):
+            elif ((u_type== 'tx' and v_type == 'output')
+                or (v_type == 'tx' and u_type == 'output')):
                 colour = 'blue'    
             else:
-                if Graph.node_type(v) == 'input' and Graph.node_type(u) =='input':
-                    colour = 'lighter_orange'
-                elif Graph.node_type(v) == 'output' and Graph.node_type(u) =='output':
-                    colour = 'lighter_blue'
+                # Same address link
+                if v_type == 'input' and u_type =='input':
+                    colour = 'light_orange'
+                elif v_type == 'output' and u_type =='output':
+                    colour = 'light_blue'
                 else:
                     colour = 'grey'
             
