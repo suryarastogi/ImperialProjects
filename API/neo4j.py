@@ -12,10 +12,23 @@ input_in = "INPUT_IN"
 output_in = "OUTPUT_IN"
 stored_in = "STORED_IN"
 
+class Output:
+    def __init__(self, addr, value, n, tx_index):
+        self.n = n
+        self.value = value
+        self.address = addr
+        self.tx_index = tx_index
+class Input:
+    def __init__(self, addr, value, n, tx_index):
+        self.n = n
+        self.value = value
+        self.address = addr
+        self.tx_index = tx_index
 class Transaction:
     def __init__(self, t, block_height=None):
         self.block_height = block_height
         self.time = t['received_time']
+        self.confirmation_mins = t['confirmation_mins']
         self.hash = t['hash']
         self.tx_index = t['tx_index']
         self.size = t['size']
@@ -27,6 +40,7 @@ class Transaction:
 
 class Neo4j(object):
 
+    # Returns transactions matching a block stored in the Neo4j db
     @staticmethod
     def get_block_data(block=411293):
         query = "MATCH (n:Block)-[:STORED_IN]-(transaction) WHERE n.height = " + str(block) + " RETURN transaction"
@@ -37,14 +51,24 @@ class Neo4j(object):
             tx = Transaction(transaction, block)
             # Inputs
             for rel in graph.match(end_node=transaction, rel_type=input_in):
-                print("AddrI: " + rel.start_node["address"])
-
+                value = rel['value']
+                tx_index = rel['tx_i']
+                n = rel['tx_n']
+                addr = rel.start_node["address"]
+                print("Ao: " + str(addr) + " Value: " + str(value) + " Txi: " + str(tx_index) + ":" + str(n))
+                tx.inputs.append(Input(addr, value, n, tx_index))
+            # Outputs
             for rel in graph.match(end_node=transaction, rel_type=output_in):
-                print("AddrO: " + rel.start_node["address"])
-                
+                value = rel['value']
+                tx_index = rel['tx_i']
+                n = rel['tx_n']
+                addr = rel.start_node["address"]
+                print("Ai: " + str(addr) + " Value: " + str(value) + " Txi: " + str(tx_index) + ":" + str(n))
+                tx.outputs.append(Output(addr, value, n, tx_index))
+
             txs.append(tx)
-        
-        return result, txs
+
+        return txs
 
     @staticmethod
     def get_tx_input_data(hash='9624905d95b0820c4a410f6265ea7bcb1cc8fa575c65210641f474e0a439243b'):
@@ -108,14 +132,21 @@ class Neo4j(object):
                     address = inp.address
                     value = inp.value
                 else:
-                    address = '0'+ str(block.height)
+                    address = 'c0'+ str(block.height)
                     era = (block_height/COINBASE_ERA_LENGTH) + 1
                     #print("Coinbase Era: " + str(era))
                     value = float(5000000000)/float(era)
                     
                 inp_node = graph.merge_one(addr_type, 'address', address)
+
+                tx_i = 0
+                tx_n = -1
+                if hasattr(inp, 'tx_index'):
+                    tx_i = inp.tx_index
+                    tx_n = inp.n
             
-                node_input_in_tx = Relationship(inp_node, input_in, tx_node, value=value)
+                node_input_in_tx = Relationship(inp_node, input_in, tx_node, value=value,
+                                                tx_i=tx_i, tx_n=tx_n)
                 graph.create(node_input_in_tx)
         
             outputs = tx.outputs
@@ -126,10 +157,12 @@ class Neo4j(object):
                     #print("Tx hash: " + tx.hash)
                     #print("Addr: " + address)
                 value = out.value
-        
+                tx_i = tx.tx_index
+                tx_n = out.n
                 out_node = graph.merge_one("Address",'address', address)
         
-                node_output_in_tx = Relationship(out_node, output_in, tx_node, value=value)
+                node_output_in_tx = Relationship(out_node, output_in, tx_node, value=value,
+                                                 tx_i=tx_i, tx_n=tx_n)
                 graph.create(node_output_in_tx)
 
             if txi % 500 == 0:
