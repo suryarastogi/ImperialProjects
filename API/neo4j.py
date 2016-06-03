@@ -122,12 +122,14 @@ class Neo4j(object):
             tx_node['received_time'] = tx.time
             tx_node['confirmation_mins'] = tx.confirmation_mins
             tx_node['mempool_size'] = tx.mempool_size
-            tx_node.push()
+            input_amnt = 0
+            output_amnt = 0
         
             tx_stored_in_block = Relationship(tx_node, stored_in, block_node)
             graph.create(tx_stored_in_block)
 
-            for inp in tx.inputs:   
+            to_create = []
+            for inp in tx.inputs:
                 if hasattr(inp, 'address'):
                     address = inp.address
                     value = inp.value
@@ -139,15 +141,17 @@ class Neo4j(object):
                     
                 inp_node = graph.merge_one(addr_type, 'address', address)
 
+                # Previous tx index, unavailable for coinbase
                 tx_i = 0
                 tx_n = -1
                 if hasattr(inp, 'tx_index'):
                     tx_i = inp.tx_index
                     tx_n = inp.n
-            
+                
+                input_amnt += value
                 node_input_in_tx = Relationship(inp_node, input_in, tx_node, value=value,
                                                 tx_i=tx_i, tx_n=tx_n)
-                graph.create(node_input_in_tx)
+                to_create.append(node_input_in_tx)
         
             outputs = tx.outputs
             for out in outputs:
@@ -161,9 +165,19 @@ class Neo4j(object):
                 tx_n = out.n
                 out_node = graph.merge_one("Address",'address', address)
         
+                output_amnt += value
                 node_output_in_tx = Relationship(out_node, output_in, tx_node, value=value,
                                                  tx_i=tx_i, tx_n=tx_n)
-                graph.create(node_output_in_tx)
+                to_create.append(node_output_in_tx)
+
+            fee = input_amnt - output_amnt
+            tx_node['input_amount'] = input_amnt
+            tx_node['output_amount'] = output_amnt
+            tx_node['fee'] = fee
+            tx_node['fee_per_byte'] = float(fee)/float(tx.size)
+            tx_node.push()
+            
+            graph.create(*to_create)
 
             if txi % 500 == 0:
                 print("---- Status: " + str(txi) + ":" + str(len(transactions)))

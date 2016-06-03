@@ -32,7 +32,8 @@ class Graph(object):
                                      gravity_x=gravity_x, mins=tx.confirmation_mins,
                                     type='tx')
             else:
-                tx_node = G.add_node(tx_id, block=tx.block_height, type='tx')
+                tx_node = G.add_node(tx_id, block=tx.block_height, tx_hash=tx.hash,
+                                     gravity_x=gravity_x, type='tx')
             
             inputs = tx.inputs
             for inp in inputs:
@@ -144,7 +145,39 @@ class Graph(object):
             
         return 0
 
-#  Colouring generated graphs
+#  Colouring functions for generated graphs
+
+    @staticmethod
+    def colour_transaction_graph(G, highlight=None):
+        G = Graph.colour_nodes(G, highlight)
+
+        edges = G.edges_iter()
+        for u, v in edges:
+            colour = None
+            
+            u_type = G.node[u]['type']
+            v_type = G.node[v]['type']
+
+            if highlight and (highlight in v and highlight in u):
+                colour = 'light_red'
+            elif ((u_type == 'tx' and v_type == 'input') 
+                or (v_type == 'tx' and u_type == 'input')):
+                colour = 'orange'
+            elif ((u_type== 'tx' and v_type == 'output')
+                or (v_type == 'tx' and u_type == 'output')):
+                colour = 'blue'    
+            else:
+                # Same address link
+                if v_type == 'input' and u_type =='input':
+                    colour = 'light_orange'
+                elif v_type == 'output' and u_type =='output':
+                    colour = 'light_blue'
+                else:
+                    colour = 'grey'
+            
+            Graph.colour_element(G[u][v], colour)
+
+        return G
 
     @staticmethod
     def colour_trace(G):
@@ -250,38 +283,6 @@ class Graph(object):
                 colour = 'green'
 
             Graph.colour_element(G.node[node], colour)
-
-        return G
-
-    @staticmethod
-    def colour_transaction_graph(G, highlight=None):
-        G = Graph.colour_nodes(G, highlight)
-
-        edges = G.edges_iter()
-        for u, v in edges:
-            colour = None
-            
-            u_type = G.node[u]['type']
-            v_type = G.node[v]['type']
-
-            if highlight and (highlight in v and highlight in u):
-                colour = 'light_red'
-            elif ((u_type == 'tx' and v_type == 'input') 
-                or (v_type == 'tx' and u_type == 'input')):
-                colour = 'orange'
-            elif ((u_type== 'tx' and v_type == 'output')
-                or (v_type == 'tx' and u_type == 'output')):
-                colour = 'blue'    
-            else:
-                # Same address link
-                if v_type == 'input' and u_type =='input':
-                    colour = 'light_orange'
-                elif v_type == 'output' and u_type =='output':
-                    colour = 'light_blue'
-                else:
-                    colour = 'grey'
-            
-            Graph.colour_element(G[u][v], colour)
 
         return G
 
