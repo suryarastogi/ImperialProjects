@@ -14,7 +14,7 @@ class AddressVizRequestSerializer(serializers.ModelSerializer):
     path = serializers.CharField(read_only=True)
     class Meta:
         model = AddressVizRequest
-        fields = ('id', 'address', 'tx_limit', 'completed', 'created', 'path')
+        fields = ('id', 'address', 'tx_offset', 'tx_limit', 'completed', 'created', 'path')
 
 class SubcomponentSerializer(serializers.ModelSerializer):
     path = serializers.CharField(read_only=True)

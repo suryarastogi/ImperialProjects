@@ -97,8 +97,9 @@ def generate_address_viz(self, id):
     if not query.completed:
         address = query.address
         limit = query.tx_limit
+        offset = query.tx_offset
 
-        txs = Blockchain.get_transactions_by_addr(address, limit)
+        txs = Blockchain.get_transactions_by_addr_offset(address, offset, limit)
         G = Graph.get_transaction_graph(txs, address)
 
         cgraph_path = connected_dir + Utils.get_address_viz_file_name(id)

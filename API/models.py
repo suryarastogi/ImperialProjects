@@ -31,6 +31,8 @@ class AddressVizRequest(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     # Desired address
     address = models.TextField()
+    # Offset to pull data from
+    tx_offset = models.IntegerField(default=0)
     # Amount of transactions
     tx_limit = models.IntegerField(default=50)
 
