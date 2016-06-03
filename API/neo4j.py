@@ -1,7 +1,10 @@
 # Neo4j Library
 from py2neo import authenticate, Graph, Node, Relationship
-from blockchain import blockexplorer
 from blockchain_wrapper import Blockchain
+from py2neo.packages.httpstream import http
+# Increase timeout
+http.socket_timeout = 9999
+
 COINBASE_ERA_LENGTH = 210000
 
 graph = Graph("http://neo4j:admin@localhost:7474/db/data/")
@@ -83,7 +86,7 @@ class Neo4j(object):
 
 
     @staticmethod
-    def import_difficulty(start_block):
+    def import_difficulty(start_block=411264):
         end_block = start_block + 2016 + 1
 
         for i in range(start_block, end_block):
@@ -99,8 +102,7 @@ class Neo4j(object):
     @staticmethod
     def import_block(block_height):
         print("Neo4j: Getting Block " + str(block_height))
-        blocks = blockexplorer.get_block_height(str(block_height), api_code="87575b65-eb36-4322-a0a1-43c2b705479f")
-        block = blocks[0]
+        block = Blockchain.get_block(block_height)
 
         print("Neo4j: Adding Block to DB")
         block_node = graph.merge_one(block_type, "height", block.height)
@@ -108,7 +110,7 @@ class Neo4j(object):
         block_node['received_time'] = block.received_time
         block_node['n_tx'] = block.n_tx
         block_node['size'] = block.size
-        block_node.push()
+        block_node['fee'] = block.fee
 
         transactions = Blockchain.process_transactions(block.transactions, block.received_time)
         print("Neo4j: Adding Txs to DB")
@@ -170,17 +172,34 @@ class Neo4j(object):
                                                  tx_i=tx_i, tx_n=tx_n)
                 to_create.append(node_output_in_tx)
 
+            # No input amount for coinbase txs
             fee = input_amnt - output_amnt
+            if fee < 0:
+                fee = 0
+
             tx_node['input_amount'] = input_amnt
             tx_node['output_amount'] = output_amnt
             tx_node['fee'] = fee
             tx_node['fee_per_byte'] = float(fee)/float(tx.size)
             tx_node.push()
-            
-            graph.create(*to_create)
+
+            try:
+                graph.create(*to_create)
+            except http.SocketError:
+                print("---- Socket Error or Timeout, Retrying with 20 rel/node buckets")
+                buckets = [to_create[i:i+20] for i in xrange(0, len(to_create), 20)]
+                for bucket in buckets:
+                    graph.create(*bucket)
+            except:
+                print("---- Unexpected error: Trying importing in steps for len " + str(len(to_create)))
+                buckets = [to_create[i:i+20] for i in xrange(0, len(to_create), 20)]
+                for bucket in buckets:
+                    graph.create(*bucket)
 
             if txi % 500 == 0:
                 print("---- Status: " + str(txi) + ":" + str(len(transactions)))
 
-        print("Block " + str(block_height) + " done with " + str(len(transactions)) + " transactions.")
+        block_node['completed'] = True
+        block_node.push()
+        print("Neo4j: Block " + str(block_height) + " done with " + str(len(transactions)) + " transactions.")
 

@@ -156,6 +156,11 @@ class Blockchain(object):
         block = blocks[0]
         return Blockchain.process_transactions(block.transactions, block.received_time)
 
+    @staticmethod
+    def get_block(block_height):
+        blocks = blockexplorer.get_block_height(str(block_height), api_code=api_key)
+        return blocks[0]
+
 
 #   Using classes from API client
 class Input:
