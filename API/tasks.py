@@ -207,7 +207,7 @@ def generate_subcomponent(self, id, path):
     os.remove(path)
 
     G = nx.read_graphml(response)
-    txs, txs_length = Graph.get_tx_indexes(G)
+    txs, txs_length = Graph.get_tx_hashes(G)
 
     # Remove the temporary layout file
     os.remove(response)

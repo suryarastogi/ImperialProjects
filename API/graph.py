@@ -1,32 +1,150 @@
 import math
 import networkx as nx
 
-api_key = "87575b65-eb36-4322-a0a1-43c2b705479f"
+# Constants for Transaction graph generation
 edge_scale = 5
 addr_weight = 30
-tx_out_weight = 1*edge_scale #5
-tx_in_weight = 4*edge_scale #20
-
-scaling_constant = 26.00/10.00 # 1.00 #12.5460737323 #Average from test block
+tx_out_weight = 1*edge_scale
+tx_in_weight = 4*edge_scale 
+scaling_constant = 26.00/10.00 # #Average from test block
 
 class Graph(object):
 
+#    Transaction Graph Generation Function
+#    Takes list of Transactions (see [kaiko/blockchain]_wrapper file for details)
+#    and an address to trace/highlight (as a string)
+
     @staticmethod
-    def node_type(node):
-        if node[0] == 'i':
-            return 'input'
-        elif node[0] == 'o':
-            return 'output'
-        elif node[0] == 't':
-            return 'tx'
-        else:
-            return 'coinbase'
+    def get_transaction_graph(transactions, highlight=None):
+        G = nx.Graph()
+
+        addrHistory = {}
+        size_list = []
+        base_block = None
+        for tx in transactions:
+            if base_block is None:
+                base_block = tx.block_height
+
+            gravity_x = float(base_block) - float(tx.block_height)
+            tx_id = "tx" + str(tx.hash)
+            if hasattr(tx, 'confirmation_mins'):
+                tx_node = G.add_node(tx_id, block=tx.block_height, tx_hash=tx.hash,
+                                     gravity_x=gravity_x, mins=tx.confirmation_mins,
+                                    type='tx')
+            else:
+                tx_node = G.add_node(tx_id, block=tx.block_height, type='tx')
+            
+            inputs = tx.inputs
+            for inp in inputs:
+                node_type = 'input'
+                if hasattr(inp, 'address'):
+                    input_id = "i" + tx_id + ":" + str(inp.address) + ":" + str(inp.n)
+                    addr = inp.address
+                else:
+                    # Coinbase
+                    node_type = 'coinbase'
+                    input_id =  "0" + tx_id
+                    addr = "0" + tx_id
+                    inp.value = 2500000000 #TODO update to be based on height
+                size = Graph.scale_size(inp.value, size_list)
+                
+                prev = Graph.get_previous(addr, addrHistory)
+                input_node = G.add_node(input_id, size=size, block=tx.block_height,
+                                        address=addr, gravity_x=gravity_x, type=node_type)
+                G.add_edge(input_id, tx_id, weight=tx_in_weight)
+                if prev is not None:
+                    G.add_edge(prev, input_id, weight=addr_weight)
+        
+                Graph.add_history(addr, input_id, addrHistory)
+            
+            outputs = tx.outputs
+            for out in outputs:
+                output_id = "o" + tx_id + ":" + str(out.address) + ":" + str(out.n)
+                addr = out.address
+                size = Graph.scale_size(out.value, size_list)
+                
+                prev = Graph.get_previous(addr, addrHistory)
+                output_node = G.add_node(output_id, size=size, block=tx.block_height,
+                                         gravity_x=gravity_x, type='output')
+                G.add_edge(tx_id, output_id, weight=tx_out_weight)
+                if prev is not None:
+                    G.add_edge(prev, output_id, weight=addr_weight)
+                
+                Graph.add_history(out.address, output_id, addrHistory)
+
+        #print("Avg Size: " + str(sum(size_list)/float(len(sizes))))
+        #print("Max Size: " + str(max(size_list)))
+        #print("Min Size: " + str(min(size_list)))
+        G = Graph.colour_transaction_graph(G, highlight)
+        return G
+
+#   Transaction Graph with linked transactions to view coin history/origin
+    @staticmethod
+    def get_trace_graph(transactions):
+        G = nx.Graph()
+        nodes = {}
+        for tx in transactions:
+            tx_id = str(tx.tx_index)
+            tx_node = G.add_node(tx_id)
+
+            inputs = tx.inputs
+            for inp in inputs:
+                if hasattr(inp, 'address'):
+                    node = str(inp.tx_index) + ":" + str(inp.n)
+                else:
+                    node = "c" + tx_id
+
+                inp_node = Graph.get_node(G, nodes, node)
+                G.add_edge(tx_id, node, weight=tx_in_weight)
+
+            outputs = tx.outputs
+            for out in outputs:
+                node = str(out.tx_index) + ":" + str(out.n)
+                out_node = Graph.get_node(G, nodes, node)
+                G.add_edge(tx_id, node, weight=tx_out_weight)
+
+        G = Graph.colour_trace(G)
+        return G
+
+
+#   Transaction Graph Helper Functions
 
     @staticmethod
     def get_node(G, nodes, node):
         if node not in nodes:
             nodes[node] = G.add_node(node)
         return nodes[node]
+
+    @staticmethod
+    def get_edge_scale():
+        return edge_scale
+
+    @staticmethod
+    def get_previous(addr, addrHistory):
+        if addr in addrHistory:
+            # Last element in history
+            return addrHistory[addr][-1]
+        else:
+            return None
+
+    @staticmethod
+    def add_history(addr, node_id, addrHistory):
+        if addr not in addrHistory:
+            addrHistory[addr] = []
+        
+        addrHistory[addr].append(node_id)        
+
+    @staticmethod
+    def scale_size(value, list):
+        if value > 0:
+            size = math.log(float(value))/scaling_constant
+            list.append(size)
+            #print(str(size) + ":" + str(value))
+            return size
+            
+        return 0
+
+#  Colouring generated graphs
 
     @staticmethod
     def colour_trace(G):
@@ -71,117 +189,6 @@ class Graph(object):
         return G
 
     @staticmethod
-    def get_trace_graph(transactions):
-        G = nx.Graph()
-        nodes = {}
-        for tx in transactions:
-            tx_id = str(tx.tx_index)
-            tx_node = G.add_node(tx_id)
-
-            inputs = tx.inputs
-            for inp in inputs:
-                if hasattr(inp, 'address'):
-                    node = str(inp.tx_index) + ":" + str(inp.n)
-                else:
-                    node = "c" + tx_id
-
-                inp_node = Graph.get_node(G, nodes, node)
-                G.add_edge(tx_id, node, weight=tx_in_weight)
-
-            outputs = tx.outputs
-            for out in outputs:
-                node = str(out.tx_index) + ":" + str(out.n)
-                out_node = Graph.get_node(G, nodes, node)
-                G.add_edge(tx_id, node, weight=tx_out_weight)
-
-        G = Graph.colour_trace(G)
-        return G
-
-    @staticmethod
-    def get_edge_scale():
-        return edge_scale
-
-    @staticmethod
-    def get_previous(addr, addrHistory):
-        if addr in addrHistory:
-            # Last element in history
-            return addrHistory[addr][-1]
-        else:
-            return None
-
-    @staticmethod
-    def add_history(addr, node_id, addrHistory):
-        if addr not in addrHistory:
-            addrHistory[addr] = []
-        
-        addrHistory[addr].append(node_id)        
-
-    @staticmethod
-    def scale_size(value, list):
-        if value > 0:
-            size = math.log(float(value))/scaling_constant
-            list.append(size)
-            #print(str(size) + ":" + str(value))
-            return size
-            
-        return 0
-
-    @staticmethod
-    def get_transaction_graph(transactions, highlight=None):
-        G = nx.Graph()
-
-        addrHistory = {}
-        size_list = []
-        for tx in transactions:
-            tx_id = "tx" + str(tx.hash)
-            if hasattr(tx, 'confirmation_mins'):
-                tx_node = G.add_node(tx_id, block=tx.block_height, mins=tx.confirmation_mins, type='tx')
-            else:
-                tx_node = G.add_node(tx_id, block=tx.block_height, type='tx')
-            
-            inputs = tx.inputs
-            for inp in inputs:
-                node_type = 'input'
-                if hasattr(inp, 'address'):
-                    input_id = "i" + tx_id + ":" + str(inp.address) + ":" + str(inp.n)
-                    addr = inp.address
-                else:
-                    # Coinbase
-                    node_type = 'coinbase'
-                    input_id =  "0" + tx_id
-                    addr = "0" + tx_id
-                    inp.value = 2500000000 #TODO update to be based on height
-                size = Graph.scale_size(inp.value, size_list)
-                
-                prev = Graph.get_previous(addr, addrHistory)
-                input_node = G.add_node(input_id, size=size, block=tx.block_height, type=node_type)
-                G.add_edge(input_id, tx_id, weight=tx_in_weight)
-                if prev is not None:
-                    G.add_edge(prev, input_id, weight=addr_weight)
-        
-                Graph.add_history(addr, input_id, addrHistory)
-            
-            outputs = tx.outputs
-            for out in outputs:
-                output_id = "o" + tx_id + ":" + str(out.address) + ":" + str(out.n)
-                addr = out.address
-                size = Graph.scale_size(out.value, size_list)
-                
-                prev = Graph.get_previous(addr, addrHistory)
-                output_node = G.add_node(output_id, size=size, block=tx.block_height, type='output')
-                G.add_edge(tx_id, output_id, weight=tx_out_weight)
-                if prev is not None:
-                    G.add_edge(prev, output_id, weight=addr_weight)
-                
-                Graph.add_history(out.address, output_id, addrHistory)
-
-        #print("Avg Size: " + str(sum(size_list)/float(len(sizes))))
-        #print("Max Size: " + str(max(size_list)))
-        #print("Min Size: " + str(min(size_list)))
-        G = Graph.colour_transaction_graph(G, highlight)
-        return G
-
-    @staticmethod
     def colour_element(e, colour):
         rgb = None
         if colour == 'grey':
@@ -221,8 +228,7 @@ class Graph(object):
         nodes = G.nodes()
         for node in nodes:
             colour = None
-            #ntype = G.node[node]['type']
-            ntype = Graph.node_type(node)
+            ntype = G.node[node]['type']
 
             if highlight and highlight in node:
                 colour = 'red'
@@ -255,10 +261,8 @@ class Graph(object):
         for u, v in edges:
             colour = None
             
-            #u_type = G.node[u]['type']
-            u_type = Graph.node_type(u)
-            #v_type = G.node[v]['type']
-            v_type = Graph.node_type(v)
+            u_type = G.node[u]['type']
+            v_type = G.node[v]['type']
 
             if highlight and (highlight in v and highlight in u):
                 colour = 'light_red'
@@ -281,20 +285,18 @@ class Graph(object):
 
         return G
 
-    @staticmethod
-    def get_tx_index(node):
-        return node.split('tx')[1]
+#   Data functions to pull information from graphs
 
     @staticmethod
-    def get_tx_indexes(G):
+    def get_tx_hashes(G):
         i = 0
         txs = ""
         nodes = G.nodes()
         for node in nodes:
-            if Graph.node_type(node) == 'tx':
+            if G.node[node]['type'] == 'tx':
                 if i > 0:
                     txs += ", "
-                txs += Graph.get_tx_index(node) 
+                txs += G.node[node]['tx_hash'] 
                 i += 1
 
         return txs, i
