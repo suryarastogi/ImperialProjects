@@ -7,6 +7,7 @@ addr_weight = 30
 tx_out_weight = 1*edge_scale
 tx_in_weight = 4*edge_scale 
 scaling_constant = 26.00/10.00 # #Average from test block
+COINBASE_ERA_LENGTH = 210000
 
 class Graph(object):
 
@@ -25,12 +26,20 @@ class Graph(object):
             if base_block is None:
                 base_block = tx.block_height
 
-            gravity_x = float(base_block) - float(tx.block_height)
+            gravity_x = float(tx.block_height) - float(base_block) 
             tx_id = "tx" + str(tx.hash)
-            if hasattr(tx, 'confirmation_mins'):
-                tx_node = G.add_node(tx_id, block=tx.block_height, tx_hash=tx.hash,
-                                     gravity_x=gravity_x, mins=tx.confirmation_mins,
-                                    type='tx')
+            if hasattr(tx, 'confirmation_mins'): # and hasattr(tx, 'fee_per_byte'):
+                # Has been processed with additional data
+                if hasattr(tx, 'mempool_size'):
+                    tx_node = G.add_node(tx_id, block=tx.block_height, tx_hash=tx.hash,
+                                     gravity_x=gravity_x, confirmation_mins=tx.confirmation_mins,
+                                     type='tx', fee_per_byte=tx.fee_per_byte, 
+                                     mempool_size=tx.mempool_size)
+                else:
+                    print("ELSE")
+                    tx_node = G.add_node(tx_id, block=tx.block_height, tx_hash=tx.hash,
+                                     gravity_x=gravity_x, confirmation_mins=tx.confirmation_mins,
+                                     fee_per_byte=tx.fee_per_byte, type='tx')
             else:
                 tx_node = G.add_node(tx_id, block=tx.block_height, tx_hash=tx.hash,
                                      gravity_x=gravity_x, type='tx')
@@ -44,14 +53,16 @@ class Graph(object):
                 else:
                     # Coinbase
                     node_type = 'coinbase'
-                    input_id =  "0" + tx_id
-                    addr = "0" + tx_id
-                    inp.value = 2500000000 #TODO update to be based on height
+                    addr = 'c0'+ str(tx.block_height)
+                    input_id = addr
+                    era = (tx.block_height/COINBASE_ERA_LENGTH) + 1
+                    inp.value = 5000000000/era
+
                 size = Graph.scale_size(inp.value, size_list)
                 
                 prev = Graph.get_previous(addr, addrHistory)
-                input_node = G.add_node(input_id, size=size, block=tx.block_height,
-                                        address=addr, gravity_x=gravity_x, type=node_type)
+                input_node = G.add_node(input_id, size=size, address=addr, value=inp.value,
+                                        gravity_x=gravity_x, type=node_type)
                 G.add_edge(input_id, tx_id, weight=tx_in_weight)
                 if prev is not None:
                     G.add_edge(prev, input_id, weight=addr_weight)
@@ -65,8 +76,8 @@ class Graph(object):
                 size = Graph.scale_size(out.value, size_list)
                 
                 prev = Graph.get_previous(addr, addrHistory)
-                output_node = G.add_node(output_id, size=size, block=tx.block_height,
-                                         gravity_x=gravity_x, type='output')
+                output_node = G.add_node(output_id, size=size, gravity_x=gravity_x,
+                                         value=out.value, type='output')
                 G.add_edge(tx_id, output_id, weight=tx_out_weight)
                 if prev is not None:
                     G.add_edge(prev, output_id, weight=addr_weight)
@@ -272,8 +283,8 @@ class Graph(object):
                 # Blue
                 colour = 'blue'
             elif ntype == 'tx':
-                if 'mins' in G.node[node]:
-                    if G.node[node]['mins'] < 20:
+                if 'confirmation_mins' in G.node[node]:
+                    if G.node[node]['confirmation_mins'] < 20:
                         colour = 'light_green'
                     else:
                      colour = 'red'

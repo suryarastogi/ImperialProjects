@@ -35,6 +35,9 @@ class Transaction:
         self.hash = t['hash']
         self.tx_index = t['tx_index']
         self.size = t['size']
+        self.fee = t['fee']
+        self.fee_per_byte = t['fee_per_byte']
+        self.mempool_size = int(t['mempool_size'])
         self.inputs = []
         self.outputs = []
         
@@ -44,6 +47,19 @@ class Transaction:
 class Neo4j(object):
 
     # Returns transactions matching a block stored in the Neo4j db
+
+    @staticmethod
+    def get_txs_in_block(block):
+        query = "MATCH (n:Block)-[:STORED_IN]-(transaction) WHERE n.height = " + str(block) + " RETURN transaction"
+        result = graph.cypher.execute(query)
+        txs = []
+        for record in result.records:
+            transaction = record.transaction
+            tx = Transaction(transaction, block)
+            txs.append(tx)
+        return txs
+
+
     @staticmethod
     def get_block_data(block=411293):
         query = "MATCH (n:Block)-[:STORED_IN]-(transaction) WHERE n.height = " + str(block) + " RETURN transaction"
@@ -92,6 +108,13 @@ class Neo4j(object):
         for i in range(start_block, end_block):
             print("Importing block: " + str(i) + " of " + str(end_block))
             Neo4j.import_block(i)
+
+    @staticmethod
+    def import_block_range(start_block, end_block):
+        for i in range(start_block, end_block):
+            print("Importing block: " + str(i) + " of " + str(end_block))
+            Neo4j.import_block(i)
+
 
     @staticmethod
     def setup_db():

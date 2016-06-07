@@ -111,14 +111,31 @@ class Blockchain(object):
         latest_time = 0
 
         for tx in txs:
+            # Calculating bounds for Kaiko mempool request
             time = tx.time
             if time < earliest_time:
                 earliest_time = time
             if time > latest_time:
                 latest_time = time
 
+            input_value = 0
+            for inp in tx.inputs:
+                if hasattr(inp, "value"):
+                    input_value += inp.value
+
+            output_value = 0
+            for out in tx.outputs:
+                output_value += out.value
+
+            fee = 0
+            if input_value - output_value > 0:
+                fee = input_value - output_value
+
+            tx.fee = fee
+            tx.fee_per_byte = float(fee)/float(tx.size)
             tx.confirmation_mins = Utils.get_mins_between(tx.time, block_time)
-        print("-- Process: Confirmation Appended")
+
+        print("-- Process: Confirmation and Fee Data Appended")
         mempool_data = Kaiko.get_mempool_sizes(earliest_time, latest_time)
         print("-- Process: Kaiko Data Received")
         for tx in txs:

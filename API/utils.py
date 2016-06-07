@@ -3,18 +3,23 @@ import math
 import networkx as nx
 from graph import Graph
 from celery.task.control import discard_all
+from django.conf import settings
 
 class Utils(object):
 
+    data_dir = settings.DATA_DIR
+    connected_dir = data_dir + "/Connected/"
+    coloured_dir = data_dir + "/Coloured/"
+
     @staticmethod
-    def fix_gephi_graphml(graph_path):
+    def fix_gephi_graphml(graph_path, highlight=None):
         print("Reading: " + graph_path)
         G = nx.read_graphml(graph_path)
         print("Colouring Graph")
-        G = Graph.colour_transaction_graph(G)
+        G = Graph.colour_transaction_graph(G, highlight)
         print("Writing Out")
         nx.write_graphml(G, graph_path)
-        print("Fixint Attributes")
+        print("Fixing Attributes")
         Utils.fix_xml(graph_path)
 
     # General fix for graphml inconsistencies between

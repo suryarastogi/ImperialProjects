@@ -21,38 +21,28 @@ from models import TraceTxVizRequest
 from blockchain_wrapper import Blockchain
 # For visualtion
 from graph import Graph
+# For neo4j importing/data tasks
+from neo4j import Neo4j
 
 data_dir = settings.DATA_DIR
 connected_dir = data_dir + "/Connected/"
 coloured_dir = data_dir + "/Coloured/"
 
-# Remote procedure call for Gephi Layout Task
-class GephiRpcClient(object):
-    def __init__(self):
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
-        self.channel = self.connection.channel()
-        
-        result = self.channel.queue_declare(exclusive=True)
-        self.callback_queue = result.method.queue
+#   Tasks for Neo4j data importing
 
-        self.channel.basic_consume(self.on_response, no_ack=True, queue=self.callback_queue)
+@app.task(bind=True)
+def import_block(self, block_height):
+    return Neo4j.import_block(block_height)
 
-    def on_response(self, ch, method, props, body):
-        if self.corr_id == props.correlation_id:
-            self.response = body
+@app.task(bind=True)
+def import_blocks(self, start_block, end_block):
+    results = {}
+    for i in range(start_block, end_block):
+        results[i] = import_block.delay(block_height=i)
 
-    def call(self, n):
-        self.response = None
-        self.corr_id = str(uuid.uuid4())
-        self.channel.basic_publish(exchange='',
-                                   routing_key='ToLayout',
-                                   properties=pika.BasicProperties(
-                                    reply_to = self.callback_queue,
-                                    correlation_id = self.corr_id,),
-                                   body=str(n))
-        while self.response is None:
-            self.connection.process_data_events()
-        return self.response
+    return results
+
+#   Tasks for generating visualisations
 
 @app.task(bind=True)
 def generate_trace_tx_viz(self,id):
@@ -224,3 +214,33 @@ def generate_subcomponent(self, id, path):
     sc.txs = txs
     sc.txs_length = txs_length
     sc.save()
+
+
+# Remote procedure call for Gephi Layout Task
+
+class GephiRpcClient(object):
+    def __init__(self):
+        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        self.channel = self.connection.channel()
+        
+        result = self.channel.queue_declare(exclusive=True)
+        self.callback_queue = result.method.queue
+
+        self.channel.basic_consume(self.on_response, no_ack=True, queue=self.callback_queue)
+
+    def on_response(self, ch, method, props, body):
+        if self.corr_id == props.correlation_id:
+            self.response = body
+
+    def call(self, n):
+        self.response = None
+        self.corr_id = str(uuid.uuid4())
+        self.channel.basic_publish(exchange='',
+                                   routing_key='ToLayout',
+                                   properties=pika.BasicProperties(
+                                    reply_to = self.callback_queue,
+                                    correlation_id = self.corr_id,),
+                                   body=str(n))
+        while self.response is None:
+            self.connection.process_data_events()
+        return self.response

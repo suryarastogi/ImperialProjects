@@ -43,12 +43,22 @@ class Kaiko(object):
                   }
                 )
                 received_response = True
+
+                if 'ts' not in response.body:
+                    received_response = False
+                    print("Error occured trying to get Kaiko data, Retrying")
+                    timeout_count += 1
             except ssl.SSLError:
                 print("Timed out, retrying")
                 timeout_count += 1
 
-        timestamps = response.body['ts']
-        bytes = response.body['bytes']
+            # Kaiko API errors
+            
+
+
+        if 'ts' in response.body:
+            timestamps = response.body['ts']
+            bytes = response.body['bytes']
 
         if time_dict is None:
             time_dict = {}
