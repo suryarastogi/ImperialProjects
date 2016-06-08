@@ -18,12 +18,12 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
 import mpld3
-#import seaborn as sns
 from graphing import Graphing
+
 
 @xframe_options_exempt
 def address_graph(request):
-    id = request.GET.get('block_request', 43)
+    id = request.GET.get('address_request', 43)
     query = AddressVizRequest.objects.get(pk=id)
     address = query.address
     offset = query.tx_offset
@@ -50,6 +50,7 @@ def address_graph(request):
     ind = np.arange(len(block_count))  # the x locations for the groups
 
     width = 0.8       # the width of the bars
+
     fig, ax = plt.subplots()
     ax.xaxis.set_tick_params(pad=15)
 

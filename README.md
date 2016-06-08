@@ -38,8 +38,9 @@ Ctrl + B then D to detach
 
 ## Cloud IPs
 
-Gephi Worker Server: 146.169.46.179
-Backend and Celery:  146.169.46.187
+Gephi Worker Server: `146.169.46.179`
+
+Backend and Celery:  `146.169.46.187`
 
 ##To Do:
 - [X] Create transactoin graph based on single address (history)

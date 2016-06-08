@@ -138,23 +138,26 @@ class Blockchain(object):
         print("-- Process: Confirmation and Fee Data Appended")
         mempool_data = Kaiko.get_mempool_sizes(earliest_time, latest_time)
         print("-- Process: Kaiko Data Received")
-        for tx in txs:
-            time = tx.time
-            dist = 0
-            mempool_size = None
-            while mempool_size is None:
-                if str(tx.time-dist) in mempool_data:
-                    mempool_size = mempool_data[str(tx.time-dist)]
-                    #print("i:" + str(tx.tx_index) + ":" + str(tx.time-dist) + ":" + mempool_size)
 
-                elif str(tx.time+dist) in mempool_data:
-                    mempool_size = mempool_data[str(tx.time+dist)]
-                    #print("i:" + str(tx.tx_index) + ":" + str(tx.time+dist) + ":" + mempool_size)
+        if len(mempool_data) > 1:
+            for tx in txs:
+                time = tx.time
+                dist = 0
+                mempool_size = None
+                while mempool_size is None and dist < len(mempool_data):
+                    if str(tx.time-dist) in mempool_data:
+                        mempool_size = mempool_data[str(tx.time-dist)]
+                        #print("i:" + str(tx.tx_index) + ":" + str(tx.time-dist) + ":" + mempool_size)
 
-                dist +=1
+                    elif str(tx.time+dist) in mempool_data:
+                        mempool_size = mempool_data[str(tx.time+dist)]
+                        #print("i:" + str(tx.tx_index) + ":" + str(tx.time+dist) + ":" + mempool_size)
 
-            tx.mempool_size = mempool_size
-        print("-- Process: Mempool Appended")
+                    dist +=1
+
+                if mempool_size is not None:
+                    tx.mempool_size = mempool_size
+            print("-- Process: Mempool Appended")
         return txs
 
 

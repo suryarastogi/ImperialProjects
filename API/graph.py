@@ -36,7 +36,6 @@ class Graph(object):
                                      type='tx', fee_per_byte=tx.fee_per_byte, 
                                      mempool_size=tx.mempool_size)
                 else:
-                    print("ELSE")
                     tx_node = G.add_node(tx_id, block=tx.block_height, tx_hash=tx.hash,
                                      gravity_x=gravity_x, confirmation_mins=tx.confirmation_mins,
                                      fee_per_byte=tx.fee_per_byte, type='tx')
