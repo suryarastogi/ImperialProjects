@@ -32,66 +32,6 @@ class Graphing(object):
         plt.show()
 
     @staticmethod
-    def d3_fee_graph_block_request(id):
-        query = BlockVizRequest.objects.get(pk=id)
-        start = query.start
-        end = query.end
-        if end - start > 1:
-            title = "Blocks [" + str(start) + ", " + str(end) + ")"
-        else:
-            title = "Block " + str(start)
-
-        txs = Graphing.get_block_viz_txs(id)
-        X = [tx.fee_per_byte for tx in txs]
-        Y = [tx.confirmation_mins for tx in txs]
-
-        fig, ax = plt.subplots(subplot_kw=dict(axisbg='#EEEEEE'))
-        N = 100
-
-        scatter = ax.scatter(X, Y)
-        ax.grid(color='white', linestyle='solid')
-
-        ax.set_title(title, size=20)
-        ax.set_ylabel('Confirmation Time (mins)')
-        ax.set_xlabel('Fee per byte (satoshi/byte)')
-
-        labels = [tx.hash for tx in txs]
-        tooltip = mpld3.plugins.PointLabelTooltip(scatter, labels=labels)
-        mpld3.plugins.connect(fig, tooltip)
-
-        mpld3.show()
-
-    @staticmethod
-    def d3_mempool_graph_block_request(id):
-        query = BlockVizRequest.objects.get(pk=id)
-        start = query.start
-        end = query.end
-        if end - start > 1:
-            title = "Blocks [" + str(start) + ", " + str(end) + ")"
-        else:
-            title = "Block " + str(start)
-
-        txs = Graphing.get_block_viz_txs(id)
-        X = [float(tx.mempool_size)/float(1024*1024) for tx in txs]
-        Y = [tx.confirmation_mins for tx in txs]
-
-        fig, ax = plt.subplots(subplot_kw=dict(axisbg='#EEEEEE'))
-        N = 100
-
-        scatter = ax.scatter(X, Y)
-        ax.grid(color='white', linestyle='solid')
-
-        ax.set_title(title, size=20)
-        ax.set_ylabel('Confirmation Time (mins)')
-        ax.set_xlabel('Mempool Size (MB)')
-
-        labels = [tx.hash for tx in txs]
-        tooltip = mpld3.plugins.PointLabelTooltip(scatter, labels=labels)
-        mpld3.plugins.connect(fig, tooltip)
-
-        mpld3.show()
-
-    @staticmethod
     def graph_address_request(id):
         query = AddressVizRequest.objects.get(pk=id)
         address = query.address
@@ -132,49 +72,6 @@ class Graphing(object):
         plt.subplots_adjust(bottom=0.15)
         plt.show()
 
-    @staticmethod
-    def d3_address_request(id):
-        query = AddressVizRequest.objects.get(pk=id)
-        address = query.address
-        offset = query.tx_offset
-        limit = query.tx_limit
-
-        title = address + " Transactions " + str(offset) + " to " + str(offset + limit)
-        txs = Graphing.get_address_viz_txs(id)
-        
-        block_count = {}
-        for tx in txs:
-
-            if str(tx.block) in block_count:
-                block_count[str(tx.block)] += 1
-            else:
-                block_count[str(tx.block)] = 1
-
-        count = []
-        key = []
-
-        for block in sorted(block_count):
-            count.append(block_count[block])
-            key.append(block)
-
-        ind = np.arange(len(block_count))  # the x locations for the groups
-
-        width = 0.8       # the width of the bars
-        fig, ax = plt.subplots()
-        ax.xaxis.set_tick_params(pad=15)
-
-        boxes = ax.bar(ind, count, width, color='b')
-
-        ax.set_title(title, size=20)
-        ax.set_ylabel('Transaction Count')
-        ax.set_xlabel('Block')
-
-        for i, box in enumerate(boxes.get_children()):
-            tooltip = mpld3.plugins.LineLabelTooltip(box, label=key[i])
-            mpld3.plugins.connect(fig, tooltip)
-
-        mpld3.plugins.connect(fig, tooltip)
-        mpld3.show()
 
     @staticmethod
     def get_address_viz_txs(id):
