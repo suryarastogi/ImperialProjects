@@ -18,6 +18,29 @@ Web server
 python manage.py runserver
 ```
 
+Gephi worker
+```
+mvn exec:java
+```
+
+## Ubuntu Requirements
+
+```
+apt-get install libfreetype6-dev
+
+```
+
+## Basic Tmux usage for SSH
+
+Ctrl + B then D to detach
+
+`tmux attach` to reatach
+
+## Cloud IPs
+
+Gephi Worker Server: 146.169.46.179
+Backend and Celery:  146.169.46.187
+
 ##To Do:
 - [X] Create transactoin graph based on single address (history)
 - [X] Expand diameter to trace coin usage

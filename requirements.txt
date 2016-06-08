@@ -23,7 +23,6 @@ pyparsing==2.1.4
 python-dateutil==2.5.3
 pytz==2016.4
 scipy==0.17.1
-seaborn==0.7.1
 six==1.10.0
 Unirest==1.1.7
 untangle==1.1.0
