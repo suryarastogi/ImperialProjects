@@ -15,6 +15,9 @@ from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 from mpl_toolkits.mplot3d import Axes3D
+import matplotlib as mpl
+# To fix lack of Xserver issue
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import mpld3
