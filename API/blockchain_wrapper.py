@@ -133,6 +133,7 @@ class Blockchain(object):
 
             tx.fee = fee
             tx.fee_per_byte = float(fee)/float(tx.size)
+            tx.confirmation_time = block_time - tx.time
             tx.confirmation_mins = Utils.get_mins_between(tx.time, block_time)
 
         print("-- Process: Confirmation and Fee Data Appended")
@@ -146,17 +147,19 @@ class Blockchain(object):
                 mempool_size = None
                 while mempool_size is None and dist < len(mempool_data):
                     if str(tx.time-dist) in mempool_data:
-                        mempool_size = mempool_data[str(tx.time-dist)]
+
+                        mempool_size, mempool_count = mempool_data[str(tx.time-dist)]
                         #print("i:" + str(tx.tx_index) + ":" + str(tx.time-dist) + ":" + mempool_size)
 
                     elif str(tx.time+dist) in mempool_data:
-                        mempool_size = mempool_data[str(tx.time+dist)]
+                        mempool_size, mempool_count = mempool_data[str(tx.time+dist)]
                         #print("i:" + str(tx.tx_index) + ":" + str(tx.time+dist) + ":" + mempool_size)
 
                     dist +=1
 
                 if mempool_size is not None:
                     tx.mempool_size = mempool_size
+                    tx.mempool_count = mempool_count
             print("-- Process: Mempool Appended")
         return txs
 

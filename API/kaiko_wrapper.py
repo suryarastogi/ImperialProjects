@@ -59,6 +59,7 @@ class Kaiko(object):
         if 'ts' in response.body:
             timestamps = response.body['ts']
             bytes = response.body['bytes']
+            tx_counts = response.body['txs']
 
         if time_dict is None:
             time_dict = {}
@@ -68,7 +69,8 @@ class Kaiko(object):
             # epoch time conversion
             date = dateutil.parser.parse(str(timestamps[i]))
             epoch = str(int(time.mktime(date.timetuple())))
+            count = str(tx_counts[i])
 
-            time_dict[epoch] = str(bytes[i])
+            time_dict[epoch] = (str(bytes[i]), tx_counts[i])
         return time_dict # ("1462064399", "7381552")
 

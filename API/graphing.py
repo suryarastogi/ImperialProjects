@@ -8,11 +8,12 @@ import mpld3
 import networkx as nx
 
 from API.neo4j import Neo4j
-from models import BlockVizRequest, AddressVizRequest
+from models import BlockVizRequest, AddressVizRequest, Subcomponent
 from utils import Utils
 
 class Graphing(object):
 
+    # Mempool Graph
     @staticmethod
     def graph_block_request(id):
         txs = Graphing.get_block_viz_txs(id)
@@ -30,6 +31,7 @@ class Graphing(object):
         ax.set_zlabel('Confirmation Time (mins)')
         plt.show()
 
+    # Address Frequency
     @staticmethod
     def graph_address_request(id):
         query = AddressVizRequest.objects.get(pk=id)
@@ -73,10 +75,31 @@ class Graphing(object):
 
 
     @staticmethod
+    def get_subcomponent_txs(id):
+        query = Subcomponent.objects.get(pk=id)
+        txs = []
+        if query.path is not None:
+            path = query.path
+            G = nx.read_graphml(path)
+            nodes = G.nodes()
+            for node in nodes:
+                if G.node[node]['type'] == 'input' or G.node[node]['type'] == 'output':
+                    # Empty object
+                    tx = type('Transaction', (object,), {})()
+                    if 'address' in G.node[node]:
+                        tx.address = G.node[node]['address']
+                    else:
+                        tx.address = "Unknown"
+                    txs.append(tx)
+        return txs
+
+
+    # Helper for block activity graph
+    @staticmethod
     def get_address_viz_txs(id):
         query = AddressVizRequest.objects.get(pk=id)
         txs = []
-        if query.completed:
+        if query.path is not None:
             path = query.path
             G = nx.read_graphml(path)
             nodes = G.nodes()
@@ -88,6 +111,7 @@ class Graphing(object):
                     txs.append(tx)
         return txs
 
+    # Helper for Mempool/Fee graphs
     @staticmethod
     def get_block_viz_txs(id):
         query = BlockVizRequest.objects.get(pk=id)
@@ -107,6 +131,7 @@ class Graphing(object):
                     txs.append(tx)
         return txs
 
+    # 3D Block Graph
     @staticmethod
     def graph_block(block):
         fig = plt.figure()

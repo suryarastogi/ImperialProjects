@@ -5,6 +5,7 @@ urlpatterns = [
     url(r'^API/fee_graph/$', views.fee_graph),
     url(r'^API/mempool_graph/$', views.mempool_graph),
     url(r'^API/address_graph/$', views.address_graph),
+    url(r'^API/subcomponent_graph/$', views.subcomponent_graph),
     # Registering all the different view paths
     url(r'^API/BlockVizRequest/(?P<pk>[0-9]+)/$', views.BlockVizRequestDetail.as_view()),
     url(r'^API/BlockVizRequestList/$', views.BlockVizRequestList.as_view()),

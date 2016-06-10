@@ -72,11 +72,16 @@ class Graph(object):
             for out in outputs:
                 output_id = "o" + tx_id + ":" + str(out.address) + ":" + str(out.n)
                 addr = out.address
+                if addr is not None:
+                    prev = Graph.get_previous(addr, addrHistory)
+                else:
+                    addr = "Unknown:" + str(out.tx_index) + ":" + str(out.n)
+
                 size = Graph.scale_size(out.value, size_list)
                 
-                prev = Graph.get_previous(addr, addrHistory)
+
                 output_node = G.add_node(output_id, size=size, gravity_x=gravity_x,
-                                         value=out.value, type='output')
+                                         value=out.value, address=addr, type='output')
                 G.add_edge(tx_id, output_id, weight=tx_out_weight)
                 if prev is not None:
                     G.add_edge(prev, output_id, weight=addr_weight)

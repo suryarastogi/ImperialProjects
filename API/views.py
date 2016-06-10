@@ -25,6 +25,52 @@ from graphing import Graphing
 
 
 @xframe_options_exempt
+def subcomponent_graph(request):
+    id = request.GET.get('subcomponent', 114)
+    title = "Subcomponent Graph"
+
+    txs = Graphing.get_subcomponent_txs(id)
+
+    address_count = {}
+    for tx in txs:
+
+        if str(tx.address) in address_count:
+            address_count[str(tx.address)] += 1
+        else:
+            address_count[str(tx.address)] = 1
+
+    count = []
+    key = []
+
+    for address in sorted(address_count):
+        count.append(address_count[address])
+        key.append(address)
+
+    ind = np.arange(len(address_count))  # the x locations for the groups
+
+    width = 0.8       # the width of the bars
+
+    fig, ax = plt.subplots()
+    ax.xaxis.set_tick_params(pad=15)
+
+    boxes = ax.bar(ind, count, width, color='b')
+
+    ax.set_title(title, size=20)
+    ax.set_ylabel('Transaction Count')
+    ax.set_xlabel('Address')
+
+    tooltip = None
+    for i, box in enumerate(boxes.get_children()):
+        tooltip = mpld3.plugins.LineLabelTooltip(box, label=key[i])
+        mpld3.plugins.connect(fig, tooltip)
+
+    mpld3.plugins.connect(fig, tooltip)
+    g = mpld3.fig_to_html(fig)
+    #mpld3.show()
+    plt.close('all')
+    return HttpResponse(g)
+
+@xframe_options_exempt
 def address_graph(request):
     id = request.GET.get('address_request', 43)
     query = AddressVizRequest.objects.get(pk=id)
