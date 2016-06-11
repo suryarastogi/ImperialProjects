@@ -22,7 +22,9 @@ class Graph(object):
         addrHistory = {}
         size_list = []
         base_block = None
-        for tx in transactions:
+        for i, tx in enumerate(transactions):
+            if i % 500 == 0:
+                print(str(i) + ":" + str(len(transactions)))
             if base_block is None:
                 base_block = tx.block_height
 
@@ -138,17 +140,18 @@ class Graph(object):
     @staticmethod
     def get_previous(addr, addrHistory):
         if addr in addrHistory:
-            # Last element in history
-            return addrHistory[addr][-1]
+            return addrHistory[addr]
         else:
             return None
 
     @staticmethod
     def add_history(addr, node_id, addrHistory):
-        if addr not in addrHistory:
-            addrHistory[addr] = []
-        
-        addrHistory[addr].append(node_id)        
+        addrHistory[addr] = node_id
+
+        #if addr not in addrHistory:
+        #    addrHistory[addr] = []
+        # 
+        #addrHistory[addr].append(node_id)        
 
     @staticmethod
     def scale_size(value, list):
