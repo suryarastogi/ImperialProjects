@@ -12,6 +12,22 @@ class Utils(object):
     coloured_dir = data_dir + "/Coloured/"
 
     @staticmethod
+    def les_mis_graph(graph_path):
+        G = nx.read_graphml(graph_path)
+        nodes = G.nodes()
+        for node in nodes:
+            x = G.node[node]['Modularity Class']
+            if int(x) % 2 == 0:
+                y = -1
+            else:
+                y = 1
+
+            G.node[node]['gravity_x'] = x
+            G.node[node]['gravity_y'] = y
+        nx.write_graphml(G, graph_path)
+
+
+    @staticmethod
     def fix_gephi_graphml(graph_path, highlight=None):
         print("Reading: " + graph_path)
         G = nx.read_graphml(graph_path)

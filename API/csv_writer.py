@@ -39,10 +39,10 @@ class CSV(object):
         errors = []
         for block in block_list:
             try:
-                CSV.write_block(i)
+                CSV.write_block(block)
             except:
-                print("Errored: " + str(i))
-                errors.append(i)
+                print("Errored: " + str(block))
+                errors.append(block)
         return errors
 
 

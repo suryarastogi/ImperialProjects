@@ -55,7 +55,7 @@ def subcomponent_graph(request):
 
     boxes = ax.bar(ind, count, width, color='b')
 
-    ax.set_title(title, size=20)
+    #ax.set_title(title, size=20)
     ax.set_ylabel('Transaction Count')
     ax.set_xlabel('Address')
 
