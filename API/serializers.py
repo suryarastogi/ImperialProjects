@@ -14,7 +14,7 @@ class AddressVizRequestSerializer(serializers.ModelSerializer):
     path = serializers.CharField(read_only=True)
     class Meta:
         model = AddressVizRequest
-        fields = ('id', 'address', 'tx_offset', 'tx_limit', 'completed', 'created', 'path')
+        fields = ('id', 'address', 'tx_offset', 'tx_limit', 'comment','completed', 'created', 'path')
 
 class SubcomponentSerializer(serializers.ModelSerializer):
     path = serializers.CharField(read_only=True)
@@ -35,7 +35,7 @@ class BlockVizRequestSerializer(serializers.ModelSerializer):
     subcomponents = SubcomponentEmbedSerializer(many=True, read_only=True)
     class Meta:
         model = BlockVizRequest
-        fields = ('id', 'created', 'start', 'end', 'threshold', 'path', 'completed', 'subcomponents')
+        fields = ('id', 'created', 'start', 'end', 'threshold', 'comment', 'path', 'completed', 'subcomponents')
 
 class BlockVizSearchSerializer(serializers.ModelSerializer):
     class Meta:
