@@ -12,6 +12,29 @@ class Utils(object):
     coloured_dir = data_dir + "/Coloured/"
 
     @staticmethod
+    def circle_pack(graph_path, threshold=1000):
+        G = nx.read_graphml(graph_path)
+        gravities = [(1.0,1.0), (-1.0,-1.0), (-1.0, 1.0), (1.0,-1.0)]
+
+        for node in G.nodes():
+            gravity_x, gravity_y = gravities[0]
+            G.node[node]['gravity_x'] = gravity_x
+            G.node[node]['gravity_y'] = gravity_y
+
+        i = 1
+        for g in nx.connected_component_subgraphs(G):
+            if len(g.nodes()) > threshold and threshold > 0:
+                gravity_x, gravity_y = gravities[i]
+                for node in g.nodes():
+                    G.node[node]['gravity_x'] = gravity_x
+                    G.node[node]['gravity_y'] = gravity_y
+                i += 1
+
+        G = Graph.colour_transaction_graph(G)
+        nx.write_graphml(G, graph_path)
+        Utils.fix_xml(graph_path)
+
+    @staticmethod
     def les_mis_graph(graph_path):
         G = nx.read_graphml(graph_path)
         nodes = G.nodes()

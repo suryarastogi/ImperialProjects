@@ -23,8 +23,8 @@ class Graph(object):
         size_list = []
         base_block = None
         for i, tx in enumerate(transactions):
-            if i % 500 == 0:
-                print(str(i) + ":" + str(len(transactions)))
+            #if i % 500 == 0:
+            #    print(str(i) + ":" + str(len(transactions)))
             if base_block is None:
                 base_block = tx.block_height
 
@@ -187,9 +187,9 @@ class Graph(object):
             else:
                 # Same address link
                 if v_type == 'input' and u_type =='input':
-                    colour = 'light_orange'
+                    colour = 'lighter_orange'
                 elif v_type == 'output' and u_type =='output':
-                    colour = 'light_blue'
+                    colour = 'lighter_blue'
                 else:
                     colour = 'grey'
             
