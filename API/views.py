@@ -1,5 +1,8 @@
 from django.shortcuts import render
 from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
 from models import BlockVizRequest, Subcomponent
 from serializers import BlockVizRequestSerializer, BlockVizSearchSerializer, SubcomponentSerializer
@@ -23,6 +26,69 @@ import numpy as np
 import mpld3
 from graphing import Graphing
 
+class SubcomponentData(APIView):
+    def get(self, request, *args, **kw):
+        id = request.GET.get('subcomponent', 114)
+        title = "Subcomponent Graph"
+
+        txs = Graphing.get_subcomponent_txs(id)
+
+        address_count = {}
+        for tx in txs:
+
+            if str(tx.address) in address_count:
+                address_count[str(tx.address)] += 1
+            else:
+                address_count[str(tx.address)] = 1
+
+        count = []
+        key = []
+
+        for address in sorted(address_count):
+            count.append(address_count[address])
+            key.append(address)
+
+        result = (tuple(key), tuple(count))
+        response = Response(result, status=status.HTTP_200_OK)
+        return response
+
+class MempoolData(APIView):
+    def get(self, request, *args, **kw):
+        id = request.GET.get('block_request', 100)
+        query = BlockVizRequest.objects.get(pk=id)
+        start = query.start
+        end = query.end
+        if end - start > 1:
+            title = "Blocks [" + str(start) + ", " + str(end) + ")"
+        else:
+            title = "Block " + str(start)
+
+        txs = Graphing.get_block_viz_txs(id)
+        X = [float(tx.mempool_size)/float(1024*1024) for tx in txs]
+        Y = [tx.confirmation_mins for tx in txs]
+
+        result = (tuple(X), tuple(Y))
+        response = Response(result, status=status.HTTP_200_OK)
+        return response
+
+class FeeData(APIView):
+    def get(self, request, *args, **kw):
+        id = request.GET.get('block_request', 100)
+        query = BlockVizRequest.objects.get(pk=id)
+        start = query.start
+        end = query.end
+        if end - start > 1:
+            title = "Blocks [" + str(start) + ", " + str(end) + ")"
+        else:
+            title = "Block " + str(start)
+
+        txs = Graphing.get_block_viz_txs(id)
+        X = [tx.fee_per_byte for tx in txs]
+        Y = [tx.confirmation_mins for tx in txs]
+
+        result = (tuple(X), tuple(Y))
+        response = Response(result, status=status.HTTP_200_OK)
+        return response
 
 @xframe_options_exempt
 def subcomponent_graph(request):
