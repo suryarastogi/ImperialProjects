@@ -68,6 +68,8 @@ class BlockVizRequest(models.Model):
     path = models.TextField(null=True)
     # Layout generation completed
     completed = models.BooleanField(default=False)
+    # Comment About The Resulting Request
+    comment = models.TextField(null=True)
     
     class Meta:
         ordering = ('created',)
