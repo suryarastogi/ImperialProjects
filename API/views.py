@@ -190,6 +190,7 @@ def address_graph(request):
 @xframe_options_exempt
 def mempool_graph(request):
     id = request.GET.get('block_request', 100)
+    dpi = int(request.GET.get('dpi', 48))
     query = BlockVizRequest.objects.get(pk=id)
     start = query.start
     end = query.end
@@ -202,15 +203,18 @@ def mempool_graph(request):
     X = [float(tx.mempool_size)/float(1024*1024) for tx in txs]
     Y = [tx.confirmation_mins for tx in txs]
 
-    fig, ax = plt.subplots(subplot_kw=dict(axisbg='#EEEEEE'))
+
+
+    fig, ax = plt.subplots(figsize=(1920/dpi, 1080/dpi), dpi=dpi, subplot_kw=dict(axisbg='#EEEEEE'))
     N = 100
 
     scatter = ax.scatter(X, Y)
     ax.grid(color='white', linestyle='solid')
+    ax.set_axis_bgcolor('black')
 
     ax.set_title(title, size=20)
-    ax.set_ylabel('Confirmation Time (mins)')
-    ax.set_xlabel('Mempool Size (MB)')
+    ax.set_ylabel('Confirmation Time (mins)', size=15)
+    ax.set_xlabel('Mempool Size (MB)', size=15)
 
     labels = [tx.hash for tx in txs]
     tooltip = mpld3.plugins.PointLabelTooltip(scatter, labels=labels)
