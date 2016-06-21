@@ -64,10 +64,11 @@ class MempoolData(APIView):
             title = "Block " + str(start)
 
         txs = Graphing.get_block_viz_txs(id)
-        X = [float(tx.mempool_size)/float(1024*1024) for tx in txs]
-        Y = [tx.confirmation_mins for tx in txs]
+        xy = [(float(tx.mempool_size)/float(1024*1024), tx.confirmation_mins) for tx in txs]
+        #X = [float(tx.mempool_size)/float(1024*1024) for tx in txs]
+        #Y = [tx.confirmation_mins for tx in txs]
 
-        result = (tuple(X), tuple(Y))
+        result = tuple(xy) #(tuple(X), tuple(Y))
         response = Response(result, status=status.HTTP_200_OK)
         return response
 
@@ -83,10 +84,11 @@ class FeeData(APIView):
             title = "Block " + str(start)
 
         txs = Graphing.get_block_viz_txs(id)
-        X = [tx.fee_per_byte for tx in txs]
-        Y = [tx.confirmation_mins for tx in txs]
+        xy = [(tx.fee_per_byte, tx.confirmation_mins) for tx in txs]
+        #X = [tx.fee_per_byte for tx in txs]
+        #Y = [tx.confirmation_mins for tx in txs]
 
-        result = (tuple(X), tuple(Y))
+        result = tuple(xy) #(tuple(X), tuple(Y))
         response = Response(result, status=status.HTTP_200_OK)
         return response
 
@@ -210,7 +212,7 @@ def mempool_graph(request):
 
     scatter = ax.scatter(X, Y)
     ax.grid(color='white', linestyle='solid')
-    ax.set_axis_bgcolor('black')
+    ax.set_axis_bgcolor('white')
 
     ax.set_title(title, size=20)
     ax.set_ylabel('Confirmation Time (mins)', size=15)
