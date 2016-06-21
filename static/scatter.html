@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Mempool Charts</title>
+		<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<style type="text/css">
+
+			body {
+				background-color: black;
+			}
+
+			.buttonContainer {
+				margin: 10px;
+			}
+
+			svg {
+				background-color: black;
+			}
+			
+			.axis path,
+			.axis line {
+				fill: none;
+				stroke: #969696;
+				shape-rendering: crispEdges;
+			}
+			
+			.axis text {
+				font-family: sans-serif;
+				font-size: 40px;
+                fill: #c7c7c7;
+			}
+            
+            .grid .tick {
+                stroke: lightgrey;
+                opacity: 0.7;
+            }
+            .grid path {
+                stroke-width: 0;
+            }
+		</style>
+	</head>
+	<body>
+        <!--
+		<div class="buttonContainer">
+			<input type="button" value="Randomize">
+		</div>
+	   -->
+		<script type="text/javascript">
+
+			//Width and height
+			var w = 1820;
+			var h = 980;
+			var padding = 100;
+            
+			function getURLParameter(name) {
+                return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
+            };
+
+            request = getURLParameter('block_request')
+            console.log(request);
+            var title = "Mempool Chart"
+            
+            if(!request){
+                request = 25;
+            }
+            else if(request == 25){
+                title = "Normal Conditions: Block 411297";
+            }
+            else if(request == 12){
+                title = "Spam Conditions: Block 365150";
+            }
+            else if(request == 15){
+                title = "Congested Conditions: Block 416450";
+            }
+            
+            
+
+             d3.json("http://146.169.46.187:8000/API/mempool_data/?block_request="+request, function(error, json) {
+                if (error) return console.warn(error);
+                dataset = json;
+                
+                var colors = d3.scale.category20();
+                
+                //Create scale functions
+                var xScale = d3.scale.linear()
+                                    .domain([d3.min(dataset, function(d) { return d[0]; }), d3.max(dataset, function(d) { return d[0]; })])
+                                    .range([padding, w - padding]);
+
+                var yScale = d3.scale.linear()
+                                    .domain([d3.min(dataset, function(d) { return d[1]; }), d3.max(dataset, function(d) { return d[1]; })])
+                                    .range([h - padding, padding]);
+
+                //Define X axis
+                var xAxis = d3.svg.axis()
+                                .scale(xScale)
+                                .orient("bottom")
+                                .ticks(5);
+
+                //Define Y axis
+                var yAxis = d3.svg.axis()
+                                .scale(yScale)
+                                .orient("left")
+                                .ticks(5);
+
+                //Create SVG element
+                var svg = d3.select("body")
+                            .append("svg")
+                            .attr("width", w)
+                            .attr("height", h);
+                 
+                svg.append("text")
+                    .attr("x", (w / 2))             
+                    .attr("y", padding)
+                    .attr("text-anchor", "middle")  
+                    .style("font-size", "60px")
+                    .style("font-family", "sans-serif")
+                    .style("text-decoration", "underline")  
+                    .text(title)
+                    .attr("fill", "#c7c7c7");
+
+                //Create circles
+                svg.append("g")
+                .attr("id", "circles")
+                .selectAll("circle")
+                .data(dataset)
+                .enter()
+                .append("circle")
+                .attr("stroke", "#393b79")
+                .attr("cx", function(d) {
+                        return xScale(d[0]) + .75*padding;
+                })
+                .attr("cy", function(d) {
+                        return yScale(d[1]);
+                })
+                .attr("r", 10)
+                .attr("fill", function(d, i) { return colors(i); });
+                
+                //Create X axis
+                svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate("+ padding +"," + (h - padding + 5) + ")")
+                    .call(xAxis);
+                
+                //Create Y axis
+                svg.append("g")
+                    .attr("class", "y axis")
+                    .attr("transform", "translate(" + (padding*1.5) + ",0)")
+                    .call(yAxis);
+                    
+                svg.append("text")
+                    .attr("class", "x label")
+                    .attr("text-anchor", "end")
+                    .attr("x", w/2 + padding)
+                    .attr("y", h - 6)
+                    .style("font-size", "40px")
+                    .style("font-family", "sans-serif")
+                    .text("Mempool Size (MB)")
+                    .attr("fill", "#c7c7c7");
+                
+                svg.append("text")
+                    .attr("class", "y label")
+                    .attr("text-anchor", "end")
+                    .attr("y", 6)
+                    .attr("x", -h/2 + 2*padding)
+                    .attr("dy", ".75em")
+                    .style("font-size", "40px")
+                    .style("font-family", "sans-serif")
+                    .attr("transform", "rotate(-90)")
+                    .text("Confirmation Time (mins)")
+                    .attr("fill", "#c7c7c7");
+            });
+		</script>
+	</body>
+</html>
