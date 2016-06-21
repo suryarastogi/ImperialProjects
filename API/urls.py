@@ -1,7 +1,9 @@
 from django.conf.urls import url
+from django.conf import settings
 from API import views
 
 urlpatterns = [
+    url(r'^API/mempool/$', views.mempool),
     url(r'^API/fee_graph/$', views.fee_graph),
     url(r'^API/mempool_graph/$', views.mempool_graph),
     url(r'^API/address_graph/$', views.address_graph),
@@ -23,3 +25,4 @@ urlpatterns = [
     url(r'^API/TraceTxVizRequest/(?P<pk>[0-9]+)/$', views.TraceTxVizRequestDetail.as_view()),
     url(r'^API/TraceTxVizRequestList/$', views.TraceTxVizRequestList.as_view()),
 ]
+

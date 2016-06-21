@@ -25,6 +25,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import mpld3
 from graphing import Graphing
+from django.conf import settings
+
+def mempool(request):
+    file_loc = settings.BASE_DIR+"/static/scatter.html"
+    f = open(file_loc, 'r')
+    return HttpResponse(f)
+
 
 class SubcomponentData(APIView):
     def get(self, request, *args, **kw):
