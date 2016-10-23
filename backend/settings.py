@@ -57,7 +57,7 @@ MIDDLEWARE_CLASSES = [
 
 # RabbitMQ Server and FileSystem
 if not DEV_LOCAL:
-    BROKER_URL = "amqp://guest:guest@146.169.46.187:5672"
+    BROKER_URL = "amqp://guest:guest@146.169.46.186:5672"
     DATA_DIR = "/vol/bitbucket/sr3213/data"
 else:
     DATA_DIR = BASE_DIR + "/data"
