@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^API/fee_data/$', views.FeeData.as_view()),
     url(r'^API/subcomponent_data/$', views.SubcomponentData.as_view()),
     url(r'^API/mempool_data/$', views.MempoolData.as_view()),
+    url(r'^API/edge_data/$', views.EdgeDataList.as_view()),
     # Registering all the different view paths
     url(r'^API/BlockVizRequest/(?P<pk>[0-9]+)/$', views.BlockVizRequestDetail.as_view()),
     url(r'^API/BlockVizRequestList/$', views.BlockVizRequestList.as_view()),

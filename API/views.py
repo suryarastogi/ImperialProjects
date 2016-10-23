@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import generics
+from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -16,6 +17,9 @@ from serializers import TraceTxVizRequestSerializer
 from django.views.generic import View
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.clickjacking import xframe_options_exempt
+
+from graphing import EdgeData
+from serializers import EdgeDataSerializer
 
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib as mpl
@@ -65,10 +69,6 @@ class MempoolData(APIView):
         query = BlockVizRequest.objects.get(pk=id)
         start = query.start
         end = query.end
-        if end - start > 1:
-            title = "Blocks [" + str(start) + ", " + str(end) + ")"
-        else:
-            title = "Block " + str(start)
 
         txs = Graphing.get_block_viz_txs(id)
         xy = [(float(tx.mempool_size)/float(1024*1024), tx.confirmation_mins) for tx in txs]
@@ -79,16 +79,30 @@ class MempoolData(APIView):
         response = Response(result, status=status.HTTP_200_OK)
         return response
 
+class EdgeDataViewSet(viewsets.ViewSet):
+    serializer_class = EdgeDataSerializer
+
+    def list(self, request):
+        id = self.request.query_params.get('block_request', 100)
+        edges = Graphing.get_block_viz_edges(id)
+        serializer = EdgeDataSerializer(instance = edges, many=True)
+        return Response(serializer.data)
+
+class EdgeDataList(generics.ListCreateAPIView):
+    serializer_class = EdgeDataSerializer
+
+    def get_queryset(self):
+        id = self.request.query_params.get('block_request', 100)
+        queryset = Graphing.get_block_viz_edges(id)
+        return queryset
+
+
 class FeeData(APIView):
     def get(self, request, *args, **kw):
         id = request.GET.get('block_request', 100)
         query = BlockVizRequest.objects.get(pk=id)
         start = query.start
         end = query.end
-        if end - start > 1:
-            title = "Blocks [" + str(start) + ", " + str(end) + ")"
-        else:
-            title = "Block " + str(start)
 
         txs = Graphing.get_block_viz_txs(id)
         xy = [(tx.fee_per_byte, tx.confirmation_mins) for tx in txs]

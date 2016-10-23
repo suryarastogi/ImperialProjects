@@ -11,6 +11,12 @@ from API.neo4j import Neo4j
 from models import BlockVizRequest, AddressVizRequest, Subcomponent
 from utils import Utils
 
+class EdgeData(object):
+        def __init__(self, start, end, type):
+            self.start = start
+            self.end = end
+            self.edge_type = type
+
 class Graphing(object):
 
     # Mempool Graph
@@ -130,6 +136,28 @@ class Graphing(object):
                     tx.fee_per_byte = G.node[node]['fee_per_byte']
                     txs.append(tx)
         return txs
+
+    # Helper for edge graphs
+    @staticmethod
+    def get_block_viz_edges(id):
+        query = BlockVizRequest.objects.get(pk=id)
+        edge_data = []
+        if query.completed:
+            path = query.path
+            G = nx.read_graphml(path)
+            edges = G.edges()
+            for a, b in edges:
+                if (G.node[a]['type'] == 'tx' and G.node[b]['type'] == 'input'):
+                    edge_data.append(EdgeData(b, a, 'input'))
+                elif (G.node[a]['type'] == 'input' and G.node[b]['type'] == 'tx'):
+                    edge_data.append(EdgeData(a,b,'input'))
+                elif (G.node[a]['type'] == 'output' and G.node[b]['type'] == 'tx'):
+                    edge_data.append(EdgeData(a,b,'output'))
+                elif (G.node[a]['type'] == 'tx' and G.node[b]['type'] == 'output'):
+                    edge_data.append(EdgeData(b,a,'output'))
+                else:
+                    edge_data.append(EdgeData(a,b, 'reuse'))
+        return edge_data
 
     # 3D Block Graph
     @staticmethod

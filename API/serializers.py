@@ -4,6 +4,21 @@ from models import BlockVizRequest, Subcomponent
 from models import AddressVizRequest
 from models import TraceTxVizRequest
 
+from graphing import EdgeData
+
+class EdgeDataSerializer(serializers.Serializer):
+    start = serializers.CharField()
+    end = serializers.CharField()
+    edge_type = serializers.CharField()
+
+    def create(self, validated_data):
+        return EdgeData(id=None, **validated_data)
+
+    def update(self, instance, validated_data):
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        return instance
+
 class TraceTxVizRequestSerializer(serializers.ModelSerializer):
     path = serializers.CharField(read_only=True)
     class Meta:
