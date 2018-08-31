@@ -1,0 +1,25 @@
+{
+  "name": "bitcoinviz",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": "https://suryanash.github.io/BitcoinViz",
+  "dependencies": {
+    "react": "^15.4.2",
+    "react-bootstrap": "^0.30.8",
+    "react-dom": "^15.4.2",
+    "react-router-bootstrap": "^0.23.1",
+    "react-router-dom": "^4.0.0",
+    "react-sigma": "^1.2.17"
+  },
+  "devDependencies": {
+    "gh-pages": "^0.12.0",
+    "react-scripts": "0.9.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "deploy": "npm run build&&gh-pages -d build"
+  }
+}
