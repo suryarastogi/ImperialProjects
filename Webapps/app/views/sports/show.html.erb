@@ -1,0 +1,17 @@
+<p id="notice"><%= notice %></p>
+<h2><%= image_tag image_url("sports/#{@sport.name}.png"), size: "36" %>          <%= @sport.name %></h2>
+<table class="table table-striped">
+  <thead>
+    <th>Leagues</th>
+  </thead>
+  <tbody>
+    <% @sport.competitions.each do |competition| %>
+      <tr>
+        <td><%= link_to competition.name, competition %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<%= link_to "Add League", new_competition_path(:sport_id => @sport.id), :class => "btn btn-default" %>
+
+<br></br>

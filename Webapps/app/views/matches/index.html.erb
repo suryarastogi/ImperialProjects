@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Match History</h1>
+
+<% create_tournament %>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Match</th>
+      <th>P1 Name</th>
+      <th>P1 Score</th>
+      <th>P2 Score</th>
+      <th>P2 Name</th>
+      <th>Competition</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @matches.each do |match| %>
+      <% if user_has_competed_in?(match) && match.competitor1 && match.competitor2 %>
+        <tr>
+          <td><%= link_to "#{match.competitor1.name} v #{match.competitor2.name}", match%></td>
+          <td><%= link_to match.competitor1.name, match.competitor1 %></td>
+          <td><%= match.competitor1_score %></td>
+          <td><%= match.competitor2_score %></td>
+          <td><%= link_to match.competitor2.name, match.competitor2 %></td>
+          <td><%= link_to match.competition.name, match.competition %></td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>
+
+<br>

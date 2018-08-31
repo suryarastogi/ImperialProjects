@@ -1,0 +1,86 @@
+<p id="notice"><%= notice %></p>
+
+<% if current_user && current_user == @user %>
+<div class="row">
+  <div class="col-md-1">
+    <% if @user.image? %>
+      <%= image_tag @user.image_url(:thumb) %>
+    <% else %>
+      <%= image_tag url_for("https://www.drupal.org/files/profile_default.jpg"), :size => "75" %>
+    <% end %>
+  </div>
+  <div class="col-md-11">
+    <div class="row">
+      <div class="col-md-2"><p><strong>Username:</strong></p></div>
+      <div class="col-md-6"><p><%= @user.username %></p></div>
+      <div class="col-md-3"><a class="btn btn-default" href="/users/<%= @user.id %>/edit" role="button">Change Account Details</a></div>
+    </div>
+    <div class="row">
+      <div class="col-md-2"><p><strong>Email:</strong></p></div>
+      <div class="col-md-8"><p><%= @user.email %></p></div>
+    </div>
+  </div>
+</div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Group Name</th>
+      <th>Chats</th>
+      <th>Number of Members</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% @user.groups.each do |group| %>
+  <% if group.id != group.user.group_id %>
+  <tr>
+    <td>
+      <%= link_to group.name, group %>
+    </td>
+    <td>
+      <div class="dropdown">
+      <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+        Chats with <%= group.name %>
+      <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+        <% group.chats.each do |chat| %>
+        <li role="presentation"><%= link_to chat.name, chat %></li>
+        <% end %>
+      </ul>
+      </div>
+    </td>
+    <td>
+      <%= group.users.count %>
+    </td>
+  </tr>
+  <% end %>
+  <% end %>
+  </tbody>
+</table>
+<% elsif current_user && current_user != @user %>
+<p>
+  <strong>Username:</strong>
+  <%= @user.username %>
+</p>
+
+<p>
+  <strong>Email:</strong>
+  <%= @user.email %>
+</p>
+<div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+    Shared Groups
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+    <% @user.groups.each do |group| %>
+      <% if group.users.include? current_user %>
+      <li role="presentation"><%= link_to group.name, group %></li>
+      <% end %>
+    <% end %>
+  </ul>
+</div>
+
+<% else %>
+You do not have access
+<% end %>

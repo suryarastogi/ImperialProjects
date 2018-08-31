@@ -1,0 +1,6 @@
+<%- model_class = Group -%>
+<div class="page-header">
+  <h1><%=t @group.name %></h1>
+</div>
+<% @redirect = groups_path %>
+<%= render :partial => 'form', redirect_to_groups: true %>

@@ -1,0 +1,8 @@
+<%= simple_form_for @chat, :html => { :class => "form-horizontal chat" } do |f| %>
+
+  <%= f.hidden_field :context, :value => @channel.id %>
+  <%= f.association :group, include_blank: false, :collection => Group.select{ |group| includes_curr_user?(group) } %>
+  <%= f.input :name %>
+  <%= f.button :submit%>
+  
+<% end %>

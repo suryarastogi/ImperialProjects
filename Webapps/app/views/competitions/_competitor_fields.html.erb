@@ -1,0 +1,16 @@
+
+<div class="form-group">
+  <div class="fields row">
+    <div class="col-lg-6">
+        <div class="col-md-4"><div class="dropdown"><%= f.collection_select(:user_id, User.all, :id, :username, {:include_blank => "Select a User"}, { :class => "btn btn-primary dropdown-toggle" })  %></div></div>
+        <div class="col-md-7"><%= f.text_field :name, class: "form-control", :placeholder => "or write a name here" %></div>
+        <div class="col-md-1">
+          <%  if not params[:action] == 'edit'  %>
+            <span class="input-group-btn" tabindex=-1>
+            <%=   link_to_remove_fields "remove", f %>
+            </span>
+          <%  end %>
+        </div>
+      </div>
+    </div> 
+  </div>

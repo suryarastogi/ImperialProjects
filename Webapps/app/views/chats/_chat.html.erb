@@ -1,0 +1,227 @@
+<%- model_class = Chat -%>
+
+<script src="//js.pusher.com/2.2/pusher.min.js"></script>
+<script>
+// If your Heroku application is within the EU region,
+// uncomment the followling lines
+// Pusher.host = 'ws-eu.pusher.com';
+// Pusher.sockjs_host = 'sockjs-eu.pusher.com';
+
+
+var pusher = new Pusher('<%= Pusher.key %>'); // uses your APP KEY
+var channel = pusher.subscribe("chat<%= chat.id %>");
+channel.bind('update', function(data) {
+  //alert(data.body);
+  html = [];
+  var div = $( "#chat<%= chat.id %>" )
+  var ul = div.find('#cbox')//document.getElementById("chatbox");
+  
+  var uid = data.user_id
+  if (data.user_id == 0 || data.user_id != <%= current_user.id %>){
+      html.push('<li class="left clearfix"><span class="chat-img pull-left">');
+      if (uid == 0) {
+        <% if @competition.image? %>
+          html.push('    <%= image_tag @competition.image_url(:thumb), class: "img-circle", size: "50" %>');
+        <% else %>
+          html.push('    <%= image_tag url_for("sports/#{@competition.sport.name}.png"), class: "img-circle", size: "50" %>');
+        <% end %>
+      }
+      else {
+        <% if current_user.image? %>
+          html.push('    <%= image_tag current_user.image_url(:thumb), class: "img-circle" %>');
+        <% else %>
+          html.push('    <%= image_tag url_for("https://www.drupal.org/files/profile_default.jpg"), class: "img-circle", size: "50" %>'); 
+        <% end %>
+      }
+      html.push('</span>');
+      html.push('  <div class="chat-body clearfix">');
+      html.push('      <div class="header">');
+      html.push('          <strong class="primary-font">');
+        html.push(data.user);
+        html.push('</strong><small class="pull-right text-muted">');
+      html.push('             <span class="glyphicon glyphicon-time"></span> just now');
+        html.push('       </small>');
+      html.push('      </div>');
+      html.push('      <p>');
+        html.push(data.body);
+      html.push('      </p>');
+      html.push('  </div>');
+      html.push('</li>');
+  }
+  else {
+      
+      div.find("#chatjx")[0].reset();
+      html.push('<li class="right clearfix"><span class="chat-img pull-right">');
+      if (uid == 0) {
+        <% if @competition.image? %>
+          html.push('    <%= image_tag @competition.image_url(:thumb), class: "img-circle", size: "50" %>');
+        <% else %>
+          html.push('    <%= image_tag url_for("sports/#{@competition.sport.name}.png"), class: "img-circle", size: "50" %>');
+        <% end %>
+      }
+      else {
+        <% if current_user.image? %>
+          html.push('    <%= image_tag current_user.image_url(:thumb), class: "img-circle" %>');
+        <% else %>
+          html.push('    <%= image_tag url_for("https://www.drupal.org/files/profile_default.jpg"), class: "img-circle", size: "50" %>'); 
+        <% end %>
+      }
+      html.push('    </span>');
+      html.push('    <div class="chat-body clearfix">');
+      html.push('        <div class="header">');
+      html.push('            <small class=" text-muted"><span class="glyphicon glyphicon-time"></span> justs now');
+          html.push('</small>');
+      html.push('            <strong class="pull-right primary-font">');
+          html.push(data.user);
+          html.push('</strong>');
+      html.push('        </div>');
+      html.push('        <p>');
+          html.push(data.body);
+      html.push('        </p>');
+      html.push('    </div>');
+      html.push('</li>');
+  }
+  
+  ul.append(html.join(' '));
+
+  var d = div.find('#cpanel');
+  //d.scrollTop(d.prop("scrollHeight"));
+  
+  d.animate({ scrollTop: d[0].scrollHeight}, 1000);
+
+  //alert(html.join(' '));
+  
+});
+</script>
+
+
+<% if chat.group.users.include? current_user %>
+
+  <!--Modified from http://bootsnipp.com/snippets/featured/chat-widget-->
+  <div class="panel panel-primary">
+      <div class="panel-heading">
+          <%= chat.name %>
+          <div class="btn-group pull-right">
+              <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                  <span class="glyphicon glyphicon-chevron-down"></span>
+              </button>
+              <ul class="dropdown-menu slidedown">
+                
+                <% chat.group.users.each do |user| %>
+                  <% if user %>  
+                    <li><%= link_to user.username, user_path(user) %><span class="glyphicon glyphicon-user">
+                    </span><%= user.username %></li>
+                  <% end %>
+                <% end %>
+                
+              </ul>
+          </div>
+      </div>
+      <div id="cpanel" class="panel-body">
+          <ul id="chatbox" class="chat">
+            <div id="cbox">
+              <% chat.messages.each do |message| %>
+                <% if message.user %>
+                    <% if current_user && message.user == current_user%>
+                      <li class="right clearfix"><span class="chat-img pull-right">
+                        <% if current_user.image? %>
+                          <%= image_tag current_user.image_url(:thumb), class: "img-circle" %>
+                        <% else %>
+                          <%= image_tag url_for("https://www.drupal.org/files/profile_default.jpg"), class: "img-circle", size: "50" %>
+                        <% end %>
+                      </span>
+                          <div class="chat-body clearfix">
+                              <div class="header">
+                                  <small class=" text-muted"><span class="glyphicon glyphicon-time"></span><%= time_ago_in_words message.created_at %></small>
+                                  <strong class="pull-right primary-font"><%= message.user.username %></strong>
+                              </div>
+                              <p>
+                                  <%= message.body %>
+                              </p>
+                          </div>
+                      </li>
+                    <% else %>
+                      <li class="left clearfix"><span class="chat-img pull-left">
+                        <% if @competition.image? %>
+                          <%= image_tag @competition.image_url(:thumb), class: "img-circle", size: "50" %>
+                        <% else %>
+                          <%= image_tag url_for("sports/#{@competition.sport.name}.png"), class: "img-circle", size: "50" %>
+                        <% end %>
+                      </span>
+                          <div class="chat-body clearfix">
+                              <div class="header">
+                                  <strong class="primary-font"><%= message.user.username %></strong> <small class="pull-right text-muted">
+                                      <span class="glyphicon glyphicon-time"></span><%= time_ago_in_words message.created_at %></small>
+                              </div>
+                              <p>
+                                  <%= message.body %>
+                              </p>
+                          </div>
+                      </li>
+                    <% end %>
+                <% elsif message.user_id == 0 %>
+                      <li class="left clearfix"><span class="chat-img pull-left">
+                        <% if @competition.image? %>
+                          <%= image_tag @competition.image_url(:thumb), class: "img-circle", size: "50" %>
+                        <% else %>
+                          <%= image_tag url_for("sports/#{@competition.sport.name}.png"), class: "img-circle", size: "50" %>
+                        <% end %>
+                      </span>
+                          <div class="chat-body clearfix">
+                              <div class="header">
+                                  <strong class="primary-font">Broadcaster</strong> <small class="pull-right text-muted">
+                                      <span class="glyphicon glyphicon-time"></span><%= time_ago_in_words message.created_at %></small>
+                              </div>
+                              <p>
+                                  <%= message.body %>
+                              </p>
+                          </div>
+                      </li>
+                <% end %>
+              <% end %>
+            </div>
+          </ul>
+      </div>
+      <div class="panel-footer">
+        <% if current_user %>
+    
+          <%= simple_form_for [chat, chat.messages.build], remote:true, html: { :id => "chatjx" } do |f| %>
+              <%= f.hidden_field :user_id, :value => current_user.id %>
+              
+              <%= f.input :body, :label => false, wrapper_html: {class: "form-inline"} do %>
+                <%= f.input :body, :label => false, :as => :string, :id => "t34", :input_html => { size:30, placeholder: "Type...", class: "form-control input-sm"}%>
+                <%= f.button :submit, "Send", :class => "btn btn-warning btn-sm" %>
+              <% end %>
+            </p>
+          <% end %>
+        <% end %>
+        
+        <!--better design-->
+  
+        <% if false %>
+        <div class="input-group">
+          <input id="btn-input" type="text" class="form-control input-sm" placeholder="Type your message here..." />
+          <span class="input-group-btn">
+              <button class="btn btn-warning btn-sm" id="btn-chat">
+                  Send</button>
+          </span>
+        </div>
+        <% end %>
+        
+      </div>
+  </div>
+
+<% elsif current_user  %>
+
+<h2>You are not a member of this chat group</h2>
+
+<% else %>
+
+<div class="container">
+
+<h2>Please <%= link_to "Sign up", '/signup' %> or <%= link_to "Log in", '/login' %> to see the chat </h2>
+
+</div>
+
+
+<% end %>

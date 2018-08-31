@@ -1,0 +1,104 @@
+<div class="container">
+<div class="col-md-8">
+<p id="notice"><%= notice %></p>
+<h2><%= @match.competition.name %> <%= @competition.season_as_string %></h2>
+<div class="col-lg-8">
+  <table class="table" id="match-table">
+    <tbody>
+      <tr>
+        <td>
+          <span class="match-competitor">
+            <% if @match.competitor1.user %>
+              <%= link_to @match.competitor1.name, @match.competitor1.user %>
+            <% else %>
+              <%= @match.competitor1.name %>
+            <% end %>
+          </span>
+        </td>
+        <td style="text-align: bottom;"><span style="font-size: 120%">vs</span></td>
+        <td>
+          <span class="match-competitor">
+            <% if @match.competitor2.user %>
+              <%= link_to @match.competitor2.name, @match.competitor2.user %>
+            <% else %>
+              <%= @match.competitor2.name %>
+            <% end %>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span class="match-score">
+            <%= @match.competitor1_score %>
+          </span>
+        </td>
+        <td>
+        </td>
+        <td>
+          <span class="match-score">
+            <%= @match.competitor2_score %>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="col-lg-8">
+  <table class="table">
+    <tbody>
+      <tr>
+        <td></td>
+        <td>Date: <%= @match.formatted_date %></td>
+        <td>Time: <%= @match.start_time %></td>
+      </tr>
+      <tr>
+        <td><b>Details</b></td>
+        <td>Match Time:</td>
+        <td><%= @match.time %></td>
+      </tr>
+      <tr>
+        <td>Formation</td>
+        <td><%= @match.home_formation %></td>
+        <td><%= @match.away_formation %></td>
+      </tr>
+      <tr>
+        <td>Defense</td>
+        <td><%= @match.home_defense %></td>
+        <td><%= @match.away_defense %></td>
+      </tr>
+      <tr>
+        <td>Midfield</td>
+        <td><%= @match.home_midfield %></td>
+        <td><%= @match.away_midfield %></td>
+      </tr>
+      <tr>
+        <td>Forwards</td>
+        <td><%= @match.home_forward %></td>
+        <td><%= @match.away_forward %></td>
+      </tr>
+      <tr>
+        <td>Substitutes</td>
+        <td><%= @match.home_subs %></td>
+        <td><%= @match.away_subs %></td>
+      </tr>
+      <tr>
+        <td>Yellow Cards</td>
+        <td><%= @match.home_yellows %></td>
+        <td><%= @match.away_yellows %></td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+</div>
+
+
+
+<div class ="col-md-4">
+  <% $redirect = @match %>
+  <% @channel = @match.channel %>
+  <%= render @channel unless @channel.nil? %>
+</div>
+</div>
+
+<%= render 'form' %>

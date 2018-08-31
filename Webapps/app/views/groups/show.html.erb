@@ -1,0 +1,34 @@
+<%- model_class = Group -%>
+<p id="notice"><%= notice %></p>
+<% if @group.users.include?(current_user) %>
+<div class="page-header">
+  <h1><%=t '.title', :default => model_class.model_name.human.titleize %></h1>
+</div>
+
+<dl class="dl-horizontal">
+  <dt><strong>Group Leader:</strong></dt>
+  <dd><%= User.find(@group.user_id).username %></dd>
+  <dt><strong><%= model_class.human_attribute_name(:name) %>:</strong></dt>
+  <dd><%= @group.name %></dd>
+  <dt><strong>Users:</strong></dt>
+  <% @group.users.each do |user| %>
+  <dd><%= link_to user.username, user %></dd>
+  <% end %>
+  <dt><strong>Chats:</strong></dt>
+  <% @group.chats.each do |chat| %>
+  <dd><%= link_to chat.name, chat%></dd>
+  <% end %>
+</dl>
+
+<%= link_to t('.back', :default => t("helpers.links.back")),
+              groups_path, :class => 'btn btn-default'  %>
+<%= link_to t('.edit', :default => t("helpers.links.edit")),
+              edit_group_path(@group), :class => 'btn btn-default' %>
+<%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+              group_path(@group),
+              :method => 'delete',
+              :data => { :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')) },
+              :class => 'btn btn-danger' %>
+<% else %>
+You are not a member of this group 
+<% end %>

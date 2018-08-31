@@ -1,0 +1,42 @@
+<%= form_for(@competition) do |f| %>
+  <%= f.hidden_field :user_id, :value => current_user.id %>
+  <% if @competition.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@competition.errors.count, "error") %> prohibited this league from being saved:</h2>
+
+      <ul>
+      <% @competition.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  
+  <div class="row">
+    <div class="form-group col-lg-6">
+      <%= f.label :name %><br>
+      <%= f.text_field :name, class: "form-control", :placeholder => "League name" %>
+    </div>
+  </div>
+  <% if not params[:action] == 'edit' %>
+  <%= f.hidden_field :sport_id, :value => @sport.id %>
+  <% end %>
+  <%= f.label "Competition Type:" %>
+  <div class="field">  
+   <%= f.radio_button :competition_type, "1" %>
+   <%= label :competition_type, "Single Round Robin" %>
+   </div>
+  <div class="field">
+   <%= f.radio_button :competition_type, "2" %>
+   <%= label :competition_type, "Double Round Robin" %>
+   </div>
+  <div class="field">
+   <%= f.radio_button :competition_type, "3" %>
+   <%= label :competition_type, "Tournament" %>
+  </div>
+  <% if not params[:action] == 'edit' %>
+    <%= label "label", :name, "Competitors" %>
+    <%= render "competitors", :f => f %>
+  <% end %>
+
+<% end %>

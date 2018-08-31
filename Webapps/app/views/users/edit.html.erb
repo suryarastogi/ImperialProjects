@@ -1,0 +1,12 @@
+<h1>Profile Settings</h1>
+
+<% if current_user && current_user == @user %>
+<%= render 'form', cant_edit_name: true %>
+<h1></h1>
+
+<h2> Upload a Profile Picture</h2>
+<h1></h1>
+<%= render 'image_upload', cant_edit_name: true %>
+<% else %>
+You do not have permission to edit another user
+<% end %>

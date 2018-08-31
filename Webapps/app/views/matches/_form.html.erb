@@ -1,0 +1,19 @@
+<div class="col-md-2">
+<%= form_for @match, :url => url_for(goal_match_path), :remote => true do |f| %>
+  <%= f.hidden_field :scorer, :value => 1 %>
+  <%= f.submit "#{@match.competitor1.name} scored", :class => "btn btn-primary" %>
+<% end %>
+</div>
+
+<div class="col-md-2">
+<%= form_for @match, :url => url_for(game_over_match_path), :remote => true do |f| %>
+  <%= f.submit "Game Over", :class => "btn btn-primary" %>
+<% end %>
+</div>
+
+<div class="col-md-2">
+<%= form_for @match, :url => url_for(goal_match_path), :remote => true do |f| %>
+  <%= f.hidden_field :scorer, :value => 2 %>
+  <%= f.submit "#{@match.competitor2.name} scored", :class => "btn btn-primary" %>
+<% end %>
+</div>

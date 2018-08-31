@@ -1,0 +1,13 @@
+<%= form_for @user do |f| %>
+<div class="control-group">
+  <p>
+    <%= f.file_field :image %>
+  </p>
+  <div class="controls">
+  <p>
+    <%= f.label :remote_image_url, "or image URL" %><br />
+    <%= f.text_field :remote_image_url %>
+  </p>
+  </div></div>
+  <%= f.submit "Save Profile Picture", :class => 'btn btn-primary' %>
+<% end %>

@@ -1,0 +1,37 @@
+<%- model_class = Group -%>
+<p id="notice"><%= notice %></p>
+<div class="page-header">
+  <h2>My Groups</h2>
+</div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th><%= model_class.human_attribute_name(:name) %></th>
+      <th><%= model_class.human_attribute_name(:created_at) %></th>
+      <th>Numbers of Members</th>
+      <th><%=t '.actions', :default => t("helpers.actions") %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if current_user %>
+      <% @groups.select { |g| g.user_id == current_user.id }.each do |group| %>
+        <tr>
+          <td><%= link_to group.name, group_path(group) %></td>
+          <td><%=l group.created_at %></td>
+          <td><%= group.users.count %></td>
+          <td>
+              <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                          edit_group_path(group), :class => 'btn btn-default btn-xs' %>
+              <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+                          group_path(group),
+                          :method => :delete,
+                          :data => { :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')) },
+                          :class => 'btn btn-xs btn-danger' %>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>
+
+<%= link_to 'New Group', new_group_path, :class => "btn btn-primary" %>

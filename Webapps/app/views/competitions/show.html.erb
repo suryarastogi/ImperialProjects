@@ -1,0 +1,278 @@
+<%= stylesheet_link_tag    'tournament'  %>
+<div class="container">
+<div class="col-md-7">
+  
+<div>
+  <div class="row">
+    <p>
+      <h2>
+        <% if @competition.image.file.nil? %>
+          <%= image_tag image_url("sports/#{@competition.sport.name}.png"), size: "36" %>
+        <% else %>
+          <%= image_tag @competition.image_url(:thumb) if @competition.image? %>
+        <% end %>
+        <%= @competition.name %> <%= @competition.season_as_string %>
+        <small style="font-size: 32%; padding-left: 10px">
+          <% if current_user.id == @competition.user_id %>
+          <%= link_to 'Edit', edit_competition_path(@competition) %>
+          <% end %>
+          
+        </small>
+      </h2>
+    </p>
+  </div>
+  
+  <% if @competition.curr_season %>
+    <div class="row">
+    <%= form_for(@competition) do |f| %>
+    <%= f.select :curr_season, 
+    options_for_select([["2012-2013","1213"],["2013-2014","1314"],["2014-2015","1415"],["2015-2016","1516"]], 
+    @competition.curr_season), :class => "btn btn-primary" %>
+    <%= f.submit "Select Season" %>
+    <% end %>
+    </div>
+  <% end %>
+  <% if @competition.competition_type == 3 %>
+  <div >
+        <div class="row">
+          <% i = 1 %>
+          <h1></h1>
+          <% @rounds.each do |r| %>
+            <h3><%= round_name(i, @competition) %></h3>
+            <% i = i + 1 %>
+            <table class="table table-hover list-table">
+              <tbody>
+                <% r.each do |m| %>
+                  <% if m.competitor1 and m.competitor2 %>
+                    <tr onclick="location.href='<%= match_path(m) %>'"  style="cursor:pointer">
+                      <td class="col-md-2"><%= m.competitor1.name %></td>
+                      <td class="col-md-1"> vs </td>
+                      <td class="col-md-2"><%= m.competitor2.name %></td>
+                      <td class="col-md-1"><%= render_score m, 1 %></td>
+                      <td class="col-md-1">-</td>
+                      <td class="col-md-1"><%= render_score m, 2 %></td>
+                    </tr> 
+                  <% elsif m.competitor1 %>
+                    <tr>
+                      <td class="col-md-2"><%= m.competitor1.name %></td>
+                      <td class="col-md-1"> vs </td>
+                      <td class="col-md-2"> TBC </td>
+                      <td class="col-md-1"><%= render_score m, 1 %></td>
+                      <td class="col-md-1">-</td>
+                      <td class="col-md-1"><%= render_score m, 2 %></td>
+                    </tr> 
+                  <% elsif m.competitor2 %>
+                    <tr>
+                      <td class="col-md-2"> TBC </td>
+                      <td class="col-md-1"> vs </td>
+                      <td class="col-md-2"><%= m.competitor2.name %></td>
+                      <td class="col-md-1"><%= render_score m, 1 %></td>
+                      <td class="col-md-1">-</td>
+                      <td class="col-md-1"><%= render_score m, 2 %></td>
+                    </tr> 
+                  <% else %>
+                    <tr>
+                      <td class="col-md-2"></td>
+                      <td class="col-md-1"> TBD </td>
+                      <td class="col-md-2"></td>
+                      <td class="col-md-1"></td>
+                      <td class="col-md-1"></td>
+                      <td class="col-md-1"></td>
+                    </tr>   
+                  <% end %>
+                <% end %>
+              </tbody>
+            </table>
+          <% end %>
+        </div>
+      </div>  
+  <% elsif @competition.curr_season.nil? %>
+    <div style="padding-top: 30px">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active"><a href="#ranking" aria-controls="ranking" role="tab" data-toggle="tab">Ranking</a></li>
+      <li role="presentation"><a href="#fixtures" aria-controls="fixtures" role="tab" data-toggle="tab">Fixtures</a></li>
+    </ul>
+  
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane fade in active" id="ranking">
+        <div class="row">
+            <table class="table table-hover list-table">
+              <thead>
+                <th>#</th>
+                <th>Name</th>
+                <th>Wins</th>
+                <th>Loses</th>
+                <th>Draws</th>
+              </thead>
+              <tbody>
+                <% i = 1 %>
+                <% @competition.competitors.sort_by{|comp| -(count_wins comp)}.each do |c| %>
+                  <tr>
+                    <td><%= i %></td>
+                    <td><%= c.name %></td>
+                    <td><%= count_wins c %></td>
+                    <td><%= count_loses c %></td>
+                    <td><%= count_draws c %></td>
+                  </tr>
+                  <% i = i + 1 %>
+                <% end %>
+              </tbody>
+            </table>  
+        </div>
+      </div>
+        <div role="tabpanel" class="tab-pane fade" id="fixtures">
+          <div class="row">
+              <table class="table table-hover list-table" id="match_table" >
+                <tbody>
+                  <% @competition.matches.each do |m| %>
+                    <% if m.competitor1 and m.competitor2 %>
+                      <tr style="cursor:pointer">
+                        <td class="col-md-2"><%= m.competitor1.name %></td>
+                        <td class="col-md-1"> vs </td>
+                        <td class="col-md-2"><%= m.competitor2.name %></td>
+                        <td class="col-md-1"><%= render_score m, 1 %></td>
+                        <td class="col-md-1">-</td>
+                        <td class="col-md-1"><%= render_score m, 2 %></td>
+                      </tr>
+                    <% end %>
+                  <% end %>
+                </tbody>
+              </table>
+          </div>
+        </div>
+    </div>
+    </div>
+  <% else %>
+  <div style="padding-top: 30px">
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#ranking" aria-controls="ranking" role="tab" data-toggle="tab">Ranking</a></li>
+    <li role="presentation"><a href="#fixtures" aria-controls="fixtures" role="tab" data-toggle="tab">Fixtures</a></li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane fade in active" id="ranking">
+      <div class="row">
+          <table class="table table-hover list-table">
+            <thead>
+              <th>#</th>
+              <th>Name</th>
+              <th>Wins</th>
+              <th>Loses</th>
+              <th>Draws</th>
+              <th>Points</th>
+              <th>F</th>
+              <th>A</th>
+              <th>GD</th>
+            </thead>
+            <tbody>
+              <% i = 1 %>
+              <% @competition.competitors.sort_by{|comp| -(count_wins comp)}.each do |c| %>
+              <% details = get_table_details c %>
+                <% if details[:season] == @competition.curr_season %>
+                <tr>
+                  <td><%= i %></td>
+                  <td><%= c.name %></td>
+                  <td><%= details[:wins] %></td>
+                  <td><%= details[:loses] %></td>
+                  <td><%= details[:draws] %></td>
+                  <td><%= details[:points] %></td>
+                  <td><%= details[:for] %></td>
+                  <td><%= details[:against] %></td>
+                  <td><%= details[:for] - details[:against] %></td>
+                </tr>
+                <% end %>
+                <% i = i + 1 %>
+              <% end %>
+            </tbody>
+          </table>  
+      </div>
+    </div>
+      <div role="tabpanel" class="tab-pane fade" id="fixtures">
+        <div class="row">
+          <% week = 0 %>
+          <table><tbody>
+            <h1></h1>
+          <% @matches.each do |m| %>
+            <% if m.competitor1 and m.competitor2 %>
+              <% if week != m.round %>
+              <%= "Week #{week}" unless week == 0 %>
+                </tbody>
+                </table>
+                <table class="table table-hover list-table" id="match_table" >
+                  <tbody>
+              <% end %>
+              <tr style="cursor:pointer">
+                <%= hidden_field_tag 'match_id', m.id %>
+                <td class="col-md-2"><%= m.competitor1.name %></td>
+                <td class="col-md-1"> vs </td>
+                <td class="col-md-2"><%= m.competitor2.name %></td>
+                <td class="col-md-1"><%= render_score m, 1 %></td>
+                <td class="col-md-1">-</td>
+                <td class="col-md-1"><%= render_score m, 2 %></td>
+                <td class="col-md-2"><%= m.start_time %></td>
+                <td class="col-md-2"><%= m.formatted_date %></td>
+              </tr>
+              <% week = week + 1 unless week == m.round %>
+            <% end %>
+          <% end %>
+          </tbody></table>
+        </div>
+      </div>
+  </div>
+  </div>
+  <% end %>
+</div>  
+</div>
+
+<div class="col-md-5">
+  <% $redirect = @competition %>
+  <% @channel = @competition.channel %>
+  <%= render @competition.channel %>
+</div>
+            
+<div class="col-md-12">
+    <% if @competition.competition_type == 3  %>
+          <main id="tournament">
+            <% ra = 2**(Math.log2(@competition.competitors.length).ceil) %>
+            <% for i in 0..@rounds.length-1 do %>
+              <% ra = ra/2 %>
+              <ul class="round round-<%=i + 1%>">
+                <% j = 1 %>
+                <li class="spacer">&nbsp;</li>
+                <% @rounds[i].each do |m| %>
+                  <% name1  = m.competitor1.name unless m.competitor1.nil? %>
+                  <% name2  = m.competitor2.name unless m.competitor2.nil? %>
+                  <% score1 = m.competitor1_score unless m.competitor1.nil? %>
+                  <% score2 = m.competitor2_score unless m.competitor2.nil? %>
+                  <% if m.competitor1 && m.competitor2 %>
+              		  <li class="game game-top winner"><%= link_to name1, m %> <span><%= link_to score1, m %></span></li>
+              		  <li class="game game-spacer">&nbsp;</li>
+              		  <li class="game game-bottom "><%= link_to name2, m %><span><%= link_to score2, m %></span></li>
+                  <% else %>
+                    <li class="game game-top winner"><%= name1 %> <span><%= score1 %></span></li>
+              		  <li class="game game-spacer">&nbsp;</li>
+              		  <li class="game game-bottom "><%= name2 %><span><%= score2 %></span></li>
+                  <% end %>
+                  <li class="spacer">&nbsp;</li>
+                  <% j+=1 %>
+      	       <% end %>
+      	       <% j.upto(ra) do %>
+              		<li class="game game-top winner" style="visibility:hidden">fill<span>0</span></li>
+              		<li class="game game-spacer" style="visibility:hidden">&nbsp;</li>
+              		<li class="game game-bottom " style="visibility:hidden">fill<span>0</span></span></li>
+                  <li class="spacer" style="visibility:hidden">&nbsp;</li>
+      	       <% end %>
+        	    </ul>
+            <% end %>
+            <% if @competition.winner %>
+              <ul class="round round-<%=@rounds.length + 1%>">
+                <b>&nbsp;&nbsp;&nbsp;<%= @competition.winner.name %></b>
+              </ul>
+            <% end %>
+          </main>
+    <% end %>
+</div>

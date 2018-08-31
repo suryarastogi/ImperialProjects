@@ -1,0 +1,5 @@
+machine:
+  # Ruby version
+  ruby:
+    version:
+      2.1.2
