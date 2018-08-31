@@ -1,0 +1,10 @@
+# Language info
+language: python
+python:
+  - "2.7.10"
+
+# Install dependencies
+install: "pip install -r requirements.txt --allow-all-external"
+
+# Run tests
+script: python ./manage.py test
